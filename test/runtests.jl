@@ -1,6 +1,7 @@
-using ACTRSimulators
-using Test
+tests = [
+    "simulator",
+    ]
 
-@testset "ACTRSimulators.jl" begin
-    # Write your tests here.
+for test in tests
+    include(test * ".jl")
 end

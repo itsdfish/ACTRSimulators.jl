@@ -3,7 +3,22 @@ uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
 authors = ["itsdfish <itsdfish@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
+Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+DiscreteEventsLite = "8b1724b8-7d2d-4f3a-bca2-6234a697fafb"
+Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
+
 [compat]
+ACTRModels = "v0.6.0"
+Cairo = "v1.0.0"
+DataStructures = "v0.18.0"
+DiscreteEventsLite = "0.1.2"
+Gtk = "v1.1.0"
+SafeTestsets = "v0.0.1"
 julia = "1"
 
 [extras]
