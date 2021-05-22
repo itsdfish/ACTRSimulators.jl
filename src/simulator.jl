@@ -70,8 +70,22 @@ end
 
 function attend!(actr, chunk, args...; kwargs...)
     actr.visual.state.busy = false
-    actr.declarative.state.empty = false
+    actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
+    return nothing 
+end
+
+function encoding!(actr, chunk, args...; kwargs...)
+    actr.imaginal.state.busy = true
+    description = "Create New Chunk"
+    tΔ = rnd_time(.200)
+    register!(actr.scheduler, encode, after, tΔ , actr, chunk; description)
+end
+
+function encode!(actr, chunk, args...; kwargs...)
+    actr.imaginal.state.busy = false
+    actr.imaginal.state.empty = false
+    add_to_buffer!(actr.imaginal, chunk)
     return nothing 
 end
 
