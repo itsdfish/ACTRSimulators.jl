@@ -1,4 +1,4 @@
-import ACTRSimulators: start!
+import ACTRSimulators: start!, press_key!
 using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
 
@@ -28,6 +28,11 @@ function present_stimulus(task, model)
     push!(task.screen, vo)
 end
 
+function press_key!(task::SimpleTask, actr, key)
+    empty!(task.screen)
+    stop!(task.scheduler)
+end
+
 scheduler = Scheduler(;trace=true)
 task = SimpleTask(;scheduler)
 procedural = Procedural()
@@ -43,12 +48,19 @@ function can_attend()
     c1(actr, args...; kwargs...) = !isempty(actr.visual_location.buffer)
     c2(actr, args...; kwargs...) = !actr.visual.state.busy
     return (c1,c2)
+end  
+
+function can_encode()
+    c1(actr, args...; kwargs...) = !isempty(actr.visual.buffer)
+    c2(actr, args...; kwargs...) = !actr.imaginal.state.busy
+    return (c1,c2)
 end    
 
-function can_stop()
-    c1(actr, args...; kwargs...) = !actr.visual.state.empty
-    return (c1,)
-end
+function can_respond()
+    c1(actr, args...; kwargs...) = !isempty(actr.imaginal.buffer)
+    c2(actr, args...; kwargs...) = !actr.motor.state.busy
+    return (c1,c2)
+end   
 
 function attend_action(actr, task, args...; kwargs...)
     buffer = actr.visual_location.buffer
@@ -58,17 +70,35 @@ function attend_action(actr, task, args...; kwargs...)
     return nothing
 end
 
-function stop(actr, task, args...; kwargs...)
-    stop!(actr.scheduler)
+function encode_action(actr, task, args...; kwargs...)
+    buffer = actr.visual.buffer
+    chunk = deepcopy(buffer[1])
+    clear_buffer!(actr.visual)
+    encoding!(actr, chunk)
+    return nothing
+end
+
+function motor_action(actr, task, args...; kwargs...)
+    buffer = actr.imaginal.buffer
+    chunk = deepcopy(buffer[1])
+    clear_buffer!(actr.imaginal)
+    key = chunk.slots.text
+    responding!(actr, task, key)
+    return nothing
 end
 
 conditions = can_attend()
 rule1 = Rule(;conditions, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
 
-conditions = can_stop()
-rule2 = Rule(;conditions, action=stop, actr, task, name="Stop")
+conditions = can_encode()
+rule2 = Rule(;conditions, action=encode_action, actr, task, name="Encode")
 push!(procedural.rules, rule2)
+
+conditions = can_respond()
+rule3 = Rule(;conditions, action=motor_action, actr, task, name="Respond")
+push!(procedural.rules, rule3)
+
 run!(actr, task)
-chunk = actr.visual.buffer[1]
-@test chunk.slots == (color=:black,text="hello")
+
+@test isempty(task.screen)

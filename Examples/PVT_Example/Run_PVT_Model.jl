@@ -4,7 +4,7 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
-using Revise, DiscreteEventsLite, ACTRModels, ACTRSimulators, Gtk, Cairo
+using Revise, ACTRModels, ACTRSimulators, Gtk, Cairo
 import ACTRSimulators: start!, press_key!
 include("PVT.jl")
 include("PVT_Model.jl")

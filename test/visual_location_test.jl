@@ -1,5 +1,5 @@
 import ACTRSimulators: start!
-using ACTRSimulators, Test, DiscreteEventsLite, ACTRModels, Random
+using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
 
 mutable struct SimpleTask{T} <: AbstractTask 

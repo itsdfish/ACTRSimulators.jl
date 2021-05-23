@@ -1,3 +1,12 @@
+"""
+    run!(actr, task::AbstractTask, until=Inf)
+
+Simulate an ACT-R model
+
+- `actr`: an ACT-R model object 
+- `task`: a task that is a subtype of `AbstractTask`
+- `until`: a specified termination time unless terminated sooner manually. Default is Inf
+"""
 function run!(actr, task::AbstractTask, until=Inf)
     s = task.scheduler
     last_event!(s, until)
@@ -17,6 +26,14 @@ function run!(actr, task::AbstractTask, until=Inf)
     return nothing
 end
 
+"""
+    pause(task, event)
+
+Pauses simulation for specified `speed` if `realtime` in `task` is true.
+
+- `task`: a task that is a subtype of `AbstractTask`
+- `event`: a task event or an internal event of the model
+"""
 function pause(task, event)
     !task.realtime ? (return nothing) : nothing
     t = (event.time - task.scheduler.time) / task.speed
@@ -24,12 +41,36 @@ function pause(task, event)
     return nothing
 end
 
-start!(task::AbstractTask, model) = nothing 
+"""
+    start!(task::AbstractTask, actr)
 
-function start!(model)
-    register!(model.scheduler, ()->(), now; description="Starting")
+A function that initializes the simulation. A `start!` function must be
+provided for the task of your simulation.
+
+- `task`: a task that is a subtype of `AbstractTask`
+- `actr`: an ACT-R model object 
+"""
+start!(task::AbstractTask, actr) = nothing 
+
+"""
+    start!(actr)
+
+A function that initializes the simulation for the model.
+
+- `task`: a task that is a subtype of `AbstractTask`
+- `actr`: an ACT-R model object 
+"""
+function start!(actr)
+    register!(actr.scheduler, ()->(), now; description="Starting")
 end
 
+"""
+    fire!(actr)
+
+Selects a production rule and registers conflict resolution and new events for selected production rule
+
+- `actr`: an ACT-R model object 
+"""
 function fire!(actr)
     actr.procedural.state.busy ? (return nothing) : nothing
     rules = actr.parms.select_rule(actr)
@@ -61,6 +102,16 @@ function count_mismatches(rule)
     return count(c->!c(), rule.conditions)
 end
 
+"""
+    attending!(actr, chunk, args...; kwargs...)
+
+Sets visual module as busy and registers a new event to attend to a `chunk`
+created by a visual object
+
+- `actr`: an ACT-R model object 
+- `chunk`: a memory chunk 
+
+"""
 function attending!(actr, chunk, args...; kwargs...)
     actr.visual.state.busy = true
     description = "Attend"
@@ -75,11 +126,20 @@ function attend!(actr, chunk, args...; kwargs...)
     return nothing 
 end
 
+"""
+    encoding!(actr, chunk, args...; kwargs...)
+
+Sets imaginal module as busy and registers a new event to create a new `chunk`
+
+- `actr`: an ACT-R model object 
+- `chunk`: a memory chunk 
+
+"""
 function encoding!(actr, chunk, args...; kwargs...)
     actr.imaginal.state.busy = true
     description = "Create New Chunk"
     tΔ = rnd_time(.200)
-    register!(actr.scheduler, encode, after, tΔ , actr, chunk; description)
+    register!(actr.scheduler, encode!, after, tΔ , actr, chunk; description)
 end
 
 function encode!(actr, chunk, args...; kwargs...)
@@ -89,6 +149,15 @@ function encode!(actr, chunk, args...; kwargs...)
     return nothing 
 end
 
+"""
+    retrieving!(actr, chunk, args...; kwargs...)
+
+Sets the declarative memory module as busy and Submits a request for a chunk and registers 
+a new event for the retrieval
+
+- `actr`: an ACT-R model object 
+- `request...`: a variable list of slot-value pairs
+"""
 function retrieving!(actr, args...; request...)
     actr.declarative.state.busy = true
     description = "Retrieve"
@@ -109,6 +178,16 @@ function retrieve!(actr, chunk, args...; kwargs...)
     return nothing 
 end
 
+"""
+    responding!(actr, task, key, args...; kwargs...)
+
+Sets the declarative motor module as busy and registers a new event for executing
+a key stroke
+
+- `actr`: an ACT-R model object 
+- `task`: a task that is a subtype of `AbstractTask`
+- `key`: a string representing a response key
+"""
 function responding!(actr, task, key, args...; kwargs...)
     actr.motor.state.busy = true
     description = "Respond"
@@ -122,7 +201,16 @@ function respond(actr, task, key)
     press_key!(task, actr, key)
 end
 
-press_key!(task::AbstractTask, model, key) = nothing 
+"""
+    press_key!(task::AbstractTask, actr, key)
+
+A user-defined function that handles the task events following a keystroke.
+
+- `task`: a task that is a subtype of `AbstractTask`
+- `actr`: an ACT-R model object 
+- `key`: a string representing a response key
+"""
+press_key!(task::AbstractTask, actr, key) = nothing 
 
 function clear_buffer!(mod::Mod)
     mod.state.empty = true

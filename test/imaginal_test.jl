@@ -1,5 +1,5 @@
 import ACTRSimulators: start!
-using ACTRSimulators, Test, DiscreteEventsLite, ACTRModels, Random
+using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
 
 mutable struct SimpleTask{T} <: AbstractTask 
@@ -47,7 +47,7 @@ end
 
 function can_encode()
     c1(actr, args...; kwargs...) = !isempty(actr.visual.buffer)
-    c2(actr, args...; kwargs...) = !actr.visual.state.busy
+    c2(actr, args...; kwargs...) = !actr.imaginal.state.busy
     return (c1,c2)
 end    
 
@@ -80,9 +80,14 @@ conditions = can_attend()
 rule1 = Rule(;conditions, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
 
-conditions = can_stop()
-rule2 = Rule(;conditions, action=stop, actr, task, name="Stop")
+conditions = can_encode()
+rule2 = Rule(;conditions, action=encode_action, actr, task, name="Encode")
 push!(procedural.rules, rule2)
+
+conditions = can_stop()
+rule3 = Rule(;conditions, action=stop, actr, task, name="Stop")
+push!(procedural.rules, rule3)
+
 run!(actr, task)
-chunk = actr.visual.buffer[1]
+chunk = actr.imaginal.buffer[1]
 @test chunk.slots == (color=:black,text="hello")
