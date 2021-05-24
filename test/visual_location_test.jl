@@ -15,11 +15,11 @@ declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative) 
 
 function can_stop()
-    c1(actr, args...; kwargs...) = !actr.visual_location.state.empty
+    c1(actr) = !actr.visual_location.state.empty
     return (c1,)
 end
 
-function stop(actr, task, args...; kwargs...)
+function stop(actr, task)
     stop!(actr.scheduler)
 end
 

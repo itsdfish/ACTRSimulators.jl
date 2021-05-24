@@ -14,20 +14,20 @@ declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
 
 function can_retrieve()
-    c1(actr, args...; kwargs...) = !actr.declarative.state.busy
+    c1(actr) = !actr.declarative.state.busy
     return (c1,)
 end
 
 function can_stop()
-    c1(actr, args...; kwargs...) = !actr.declarative.state.empty
+    c1(actr) = !actr.declarative.state.empty
     return (c1,)
 end
 
-function retrieve_chunk(actr, task, args...; kwargs...)
+function retrieve_chunk(actr, task)
     retrieving!(actr; animal=:dog)
 end
 
-function stop(actr, task, args...; kwargs...)
+function stop(actr, task)
     stop!(actr.scheduler)
 end
 

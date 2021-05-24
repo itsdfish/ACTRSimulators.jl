@@ -15,24 +15,24 @@ declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
 
 function can_attend()
-    c1(actr, args...; kwargs...) = !isempty(actr.visual_location.buffer)
-    c2(actr, args...; kwargs...) = !actr.visual.state.busy
+    c1(actr) = !isempty(actr.visual_location.buffer)
+    c2(actr) = !actr.visual.state.busy
     return (c1,c2)
 end  
 
 function can_encode()
-    c1(actr, args...; kwargs...) = !isempty(actr.visual.buffer)
-    c2(actr, args...; kwargs...) = !actr.imaginal.state.busy
+    c1(actr) = !isempty(actr.visual.buffer)
+    c2(actr) = !actr.imaginal.state.busy
     return (c1,c2)
 end    
 
 function can_respond()
-    c1(actr, args...; kwargs...) = !isempty(actr.imaginal.buffer)
-    c2(actr, args...; kwargs...) = !actr.motor.state.busy
+    c1(actr) = !isempty(actr.imaginal.buffer)
+    c2(actr) = !actr.motor.state.busy
     return (c1,c2)
 end   
 
-function attend_action(actr, task, args...; kwargs...)
+function attend_action(actr, task)
     buffer = actr.visual_location.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual_location)
@@ -40,7 +40,7 @@ function attend_action(actr, task, args...; kwargs...)
     return nothing
 end
 
-function encode_action(actr, task, args...; kwargs...)
+function encode_action(actr, task)
     buffer = actr.visual.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual)
@@ -48,7 +48,7 @@ function encode_action(actr, task, args...; kwargs...)
     return nothing
 end
 
-function motor_action(actr, task, args...; kwargs...)
+function motor_action(actr, task)
     buffer = actr.imaginal.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.imaginal)
