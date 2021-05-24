@@ -16,9 +16,27 @@ include("PVT.jl")
 include("PVT_Model.jl")
 ```
 
-```julia
+Next, create an event scheduler as follows. When the option `trace` is set to true, a description and execution time will print for each processed event. 
+
+```julia 
 scheduler = Scheduler(;trace=true)
+```
+
+A task object is created with the `PVT` constructor, which includes options for the number of trials, whether the GUI is visible and whether the task executes in real time. 
+
+```julia
 task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
+```
+
+Now we will initialize the model. The model consists of components for the following modules:
+
+-'procedural` memory
+- `visual_location` 
+- `visual`
+
+Each of the modules are passed to the `actr` model object along with a reference to the scheduler. 
+
+```julia
 procedural = Procedural()
 T = vo_to_chunk() |> typeof
 visual_location = VisualLocation(buffer=T[])
@@ -73,7 +91,6 @@ function can_respond()
 end
 ```
 
-
 ## Actions
 
 After a production rule is selected, a set of actions are executed that modify the architecture and possibly modify the exeternal environment. Each production rule is associated with an action function. For example, the action function for the production rule wait is `wait_action`. Each condition requires an `actr` model object, `args...` and `kwargs...`. A `task` object is passed to the `motor_action` function to allow the model to interact with the external world. 
@@ -104,6 +121,7 @@ end
 ```
 
 ### Respond 
+The function `respond_action` is executed upon selection of the `respond` production rule. The function `respond_action` performs two actions: (1) clear the visual buffer and (2) executes the function `responding!` which executes the motor response after a delay and calls the user-defined function `press_key`. The model uses `press_key` to interact with the task and collect data.  
 
 ```julia 
 function respond_action(actr, task, args...; kwargs...)
@@ -113,6 +131,18 @@ function respond_action(actr, task, args...; kwargs...)
     return nothing
 end
 ```
+
+## Construct Production Rules
+
+The constructor `Rule` creates a production rule from the following keyword arguments: 
+
+- `conditions`: a list of functions representing selection conditions
+- `action`: a function that performs the actions of the production rule
+- `actr`: a reference to the `ACTR` model object
+- `task`: a reference to the PVT task
+- `name`: an optional name for the production rule
+
+Each production rule is pushed into a vector located in the `procedural` memory object.
 
 ```julia 
 conditions = can_attend()
@@ -125,4 +155,8 @@ conditions = can_respond()
 rule3 = Rule(;conditions, action=respond_action, actr, task, name="Respond")
 push!(procedural.rules, rule3)
 ```
+Now that the model and task have been defined, we can now run the model simulation. A GUI will appear upon running the following code:
 
+```julia
+run!(actr, task)
+```

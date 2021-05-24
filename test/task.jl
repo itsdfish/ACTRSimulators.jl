@@ -23,7 +23,7 @@ end
 function start!(task::SimpleTask, model)
     isi = 2.0
     description = "Present Stimulus"
-    register!(task.scheduler, present_stimulus, after, isi, task, model;
+    register!(task, present_stimulus, after, isi, task, model;
         description) 
 end
 

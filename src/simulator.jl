@@ -57,7 +57,7 @@ A function that initializes the simulation for the model.
 - `actr`: an ACT-R model object 
 """
 function start!(actr)
-    register!(actr.scheduler, ()->(), now; description="Starting")
+    register!(actr, ()->(), now; description="Starting")
 end
 
 """
@@ -76,7 +76,7 @@ function fire!(actr)
         tΔ = rnd_time(.05)
         resolving(actr, true)
         f(r, a, v) = (resolving(a, v), r.action()) 
-        register!(actr.scheduler, f, after, tΔ, rule, actr, false; description)
+        register!(actr, f, after, tΔ, rule, actr, false; description)
     end
     return nothing 
 end
@@ -84,24 +84,53 @@ end
 resolving(actr, v) = actr.procedural.state.busy = v
 
 function register!(actr::AbstractACTR, fun, when::Now, args...; id="", type="", description="", kwargs...)
-    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+    scheduler = actr.scheduler
+    register!(scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
 end
 
-function register!(actr::AbstractACTR, fun, when::At, args...; id="", type="", description="", kwargs...)
-    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+function register!(actr::AbstractACTR, fun, when::At, t, args...; id="", type="", description="", kwargs...)
+    scheduler = actr.scheduler
+    register!(scheduler, fun, t, args...; id, type, description, kwargs...)
 end
 
-function register!(actr::AbstractACTR, fun, when::After, args...; id="", type="", description="", kwargs...)
-    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+function register!(actr::AbstractACTR, fun, when::After, t, args...; id="", type="", description="", kwargs...)
+    scheduler = actr.scheduler
+    register!(scheduler, fun, scheduler.time + t, args...; id, type, description, kwargs...)
 end
 
 function register!(actr::AbstractACTR, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
+    scheduler = actr.scheduler
     function f(args...; kwargs...) 
         fun1 = ()->fun(args...; kwargs...)
         fun1()
-        register!(actr.scheduler, fun, every, t, args...; id, type, description, kwargs...)
+        register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
     end
-    register!(actr.scheduler, f, after, t, args...; id, type, description, kwargs...)
+    register!(scheduler, f, after, t, args...; id, type, description, kwargs...)
+end
+
+function register!(task::AbstractTask, fun, when::Now, args...; id="", type="", description="", kwargs...)
+    scheduler = task.scheduler
+    register!(scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+end
+
+function register!(task::AbstractTask, fun, when::At, t, args...; id="", type="", description="", kwargs...)
+    scheduler = task.scheduler
+    register!(scheduler, fun, t, args...; id, type, description, kwargs...)
+end
+
+function register!(task::AbstractTask, fun, when::After, t, args...; id="", type="", description="", kwargs...)
+    scheduler = task.scheduler
+    register!(scheduler, fun, scheduler.time + t, args...; id, type, description, kwargs...)
+end
+
+function register!(task::AbstractTask, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
+    scheduler = task.scheduler
+    function f(args...; kwargs...) 
+        fun1 = ()->fun(args...; kwargs...)
+        fun1()
+        register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
+    end
+    register!(scheduler, f, after, t, args...; id, type, description, kwargs...)
 end
 
 function compute_utility!(actr)
@@ -133,7 +162,7 @@ function attending!(actr, chunk, args...; kwargs...)
     actr.visual.state.busy = true
     description = "Attend"
     tΔ = rnd_time(.085)
-    register!(actr.scheduler, attend!, after, tΔ , actr, chunk; description)
+    register!(actr, attend!, after, tΔ , actr, chunk; description)
 end
 
 """
@@ -166,7 +195,7 @@ function encoding!(actr, chunk, args...; kwargs...)
     actr.imaginal.state.busy = true
     description = "Create New Chunk"
     tΔ = rnd_time(.200)
-    register!(actr.scheduler, encode!, after, tΔ , actr, chunk; description)
+    register!(actr, encode!, after, tΔ , actr, chunk; description)
 end
 
 """
@@ -201,7 +230,7 @@ function retrieving!(actr, args...; request...)
     cur_time = get_time(actr)
     chunk = retrieve(actr, cur_time; request...)
     tΔ = compute_RT(actr, chunk)
-    register!(actr.scheduler, retrieve!, after, tΔ , actr, chunk; description)
+    register!(actr, retrieve!, after, tΔ , actr, chunk; description)
 end
 
 """
@@ -238,7 +267,7 @@ function responding!(actr, task, key, args...; kwargs...)
     actr.motor.state.busy = true
     description = "Respond"
     tΔ = rnd_time(.060)
-    register!(actr.scheduler, respond!, after, tΔ , actr, task, key;
+    register!(actr, respond!, after, tΔ , actr, task, key;
         description)
 end
 

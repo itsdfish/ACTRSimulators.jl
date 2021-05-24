@@ -28,3 +28,5 @@ conditions = can_respond()
 rule3 = Rule(;conditions, action=respond_action, actr, task, name="Respond")
 push!(procedural.rules, rule3)
 run!(actr, task)
+# “A first look at rigorous probability theory” Jeffrey S. Rosenthal 
+# Gödel Escher Bach 

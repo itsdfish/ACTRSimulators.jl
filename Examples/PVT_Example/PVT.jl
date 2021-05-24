@@ -128,7 +128,7 @@ end
 function run_trial!(task, actr)
     isi = sample_isi(task)
     description = "present stimulus"
-    register!(task.scheduler, present_stimulus, after, isi, task, actr;
+    register!(task, present_stimulus, after, isi, task, actr;
         description)
 end
 

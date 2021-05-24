@@ -25,7 +25,7 @@ end
 ###################################################################################################
 function wait_action(actr, args...; kwargs...)
     description = "Wait"
-    register!(actr.scheduler, ()->(), now; description)
+    register!(actr, ()->(), now; description)
     return nothing
 end
 
