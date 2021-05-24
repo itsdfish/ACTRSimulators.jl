@@ -1,20 +1,8 @@
 using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
+include("task.jl")
 
-mutable struct SimpleTask{T} <: AbstractTask 
-    scheduler::T
-    visible::Bool
-    realtime::Bool
-    speed::Float64
-    screen::Vector{VisualObject}
-end
-
-function SimpleTask(;scheduler, visible=false, realtime=false, speed=1.0,
-    screen=Vector{VisualObject}())
-    SimpleTask(scheduler, visible, realtime, speed, screen)
-end
-
-scheduler = Scheduler(;trace=true)
+scheduler = Scheduler(;trace=true, store=true)
 task = SimpleTask(;scheduler)
 procedural = Procedural()
 T = vo_to_chunk() |> typeof
@@ -53,3 +41,12 @@ push!(procedural.rules, rule2)
 run!(actr, task)
 chunk = actr.declarative.buffer[1]
 @test chunk.slots == (animal=:dog,)
+
+observed = map(x->x.description, scheduler.complete_events)
+expected = [
+    "Starting", 
+    "Selected Retrieve", 
+    "Retrieve", 
+    "Selected Stop"
+]
+@test expected == observed

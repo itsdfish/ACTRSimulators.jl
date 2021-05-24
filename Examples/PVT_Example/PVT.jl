@@ -21,7 +21,7 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     screen=Vector{VisualObject}(), window=nothing, canvas=nothing, visible=false, speed=1.0)
 ````
 """
-mutable struct PVT{T,W,C} <: AbstractTask 
+mutable struct PVT{T,W,C,F1,F2} <: AbstractTask 
     n_trials::Int
     trial::Int 
     lb::Float64
@@ -35,15 +35,31 @@ mutable struct PVT{T,W,C} <: AbstractTask
     visible::Bool
     realtime::Bool
     speed::Float64
+    press_key!::F1
+    start!::F2
 end
 
-function PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler=nothing, 
-    screen=Vector{VisualObject}(), window=nothing, canvas=nothing, visible=false, realtime=false,
-    speed=1.0)
+function PVT(;
+    n_trials=10, 
+    trial=1, 
+    lb=2.0, 
+    ub=10.0, 
+    width=600.0, 
+    height=600.0, 
+    scheduler=nothing, 
+    screen=Vector{VisualObject}(), 
+    window=nothing, 
+    canvas=nothing, 
+    visible=false, 
+    realtime=false,
+    speed=1.0,
+    press_key=press_key!,
+    start! =start!
+    )
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return PVT(n_trials, trial, lb, ub, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed)
+        realtime, speed, press_key!, start!)
 end
 
 function setup_window(width)
@@ -94,35 +110,35 @@ function clear!(task)
     return nothing
 end
 
-function start!(task::PVT, model)
-    run_trial!(task, model)
+function start!(task::PVT, actr)
+    run_trial!(task, actr)
 end
 
 function sample_isi(task)
     return rand(Uniform(task.lb, task.ub))
 end
 
-function present_stimulus(task, model)
+function present_stimulus(task, actr)
     vo = VisualObject()
-    add_to_visicon!(model, vo; stuff=true)
+    add_to_visicon!(actr, vo; stuff=true)
     push!(task.screen, vo)
     task.visible ? draw_object!(task) : nothing
 end
 
-function run_trial!(task, model)
+function run_trial!(task, actr)
     isi = sample_isi(task)
     description = "present stimulus"
-    register!(task.scheduler, present_stimulus, after, isi, task, model;
+    register!(task.scheduler, present_stimulus, after, isi, task, actr;
         description)
 end
 
-function press_key!(task::PVT, model, key)
+function press_key!(task::PVT, actr, key)
     if key == "sb"
         empty!(task.screen)
         task.visible ? clear!(task) : nothing
         if task.trial < task.n_trials
             task.trial += 1
-            run_trial!(task, model)
+            run_trial!(task, actr)
         else
             stop!(task.scheduler)
         end

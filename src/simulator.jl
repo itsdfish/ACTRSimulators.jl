@@ -10,20 +10,27 @@ Simulate an ACT-R model
 function run!(actr, task::AbstractTask, until=Inf)
     s = task.scheduler
     last_event!(s, until)
-    start!(task, actr)
+    task.start!(task, actr)
     start!(actr)
     fire!(actr)
     while is_running(s, until)
-        event = dequeue!(s.events)
-        pause(task, event)
-        s.time = event.time
-        event.fun()
-        fire!(actr)
-        s.store ? push!(s.complete_events, event) : nothing
-        s.trace ? print_event(event) : nothing
+        next_event!(s, actr, task)
     end
     s.trace && !s.running ? print_event(s.time, "", "stopped") : nothing
     return nothing
+end
+
+next_event!(actr, task) = next_event!(actr.scheduler, actr, task)
+
+function next_event!(s, actr, task)
+    event = dequeue!(s.events)
+    pause(task, event)
+    s.time = event.time
+    event.fun()
+    fire!(actr)
+    s.store ? push!(s.complete_events, event) : nothing
+    s.trace ? print_event(event) : nothing
+    return nothing 
 end
 
 """
@@ -40,17 +47,6 @@ function pause(task, event)
     sleep(t)
     return nothing
 end
-
-"""
-    start!(task::AbstractTask, actr)
-
-A function that initializes the simulation. A `start!` function must be
-provided for the task of your simulation.
-
-- `task`: a task that is a subtype of `AbstractTask`
-- `actr`: an ACT-R model object 
-"""
-start!(task::AbstractTask, actr) = nothing 
 
 """
     start!(actr)
@@ -87,6 +83,27 @@ end
 
 resolving(actr, v) = actr.procedural.state.busy = v
 
+function register!(actr::AbstractACTR, fun, when::Now, args...; id="", type="", description="", kwargs...)
+    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+end
+
+function register!(actr::AbstractACTR, fun, when::At, args...; id="", type="", description="", kwargs...)
+    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+end
+
+function register!(actr::AbstractACTR, fun, when::After, args...; id="", type="", description="", kwargs...)
+    register!(actr.scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
+end
+
+function register!(actr::AbstractACTR, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
+    function f(args...; kwargs...) 
+        fun1 = ()->fun(args...; kwargs...)
+        fun1()
+        register!(actr.scheduler, fun, every, t, args...; id, type, description, kwargs...)
+    end
+    register!(actr.scheduler, f, after, t, args...; id, type, description, kwargs...)
+end
+
 function compute_utility!(actr)
     #@unpack σu, δu = actr.parms
     δu = 1.0
@@ -119,6 +136,16 @@ function attending!(actr, chunk, args...; kwargs...)
     register!(actr.scheduler, attend!, after, tΔ , actr, chunk; description)
 end
 
+"""
+    attend!(actr, chunk, args...; kwargs...)
+
+Completes an attention shift by adding a `chunk` to the visual buffer and setting
+states to busy = false and empty = false.
+
+- `actr`: an ACT-R model object 
+- `chunk`: a memory chunk 
+
+"""
 function attend!(actr, chunk, args...; kwargs...)
     actr.visual.state.busy = false
     actr.visual.state.empty = false
@@ -142,6 +169,16 @@ function encoding!(actr, chunk, args...; kwargs...)
     register!(actr.scheduler, encode!, after, tΔ , actr, chunk; description)
 end
 
+"""
+    encode!(actr, chunk, args...; kwargs...)
+
+Completes the creation of a chunk and adds resulting `chunk` to the imaginal buffer. The buffer
+states are set to busy = false and empty = false.
+
+- `actr`: an ACT-R model object 
+- `chunk`: a memory chunk 
+
+"""
 function encode!(actr, chunk, args...; kwargs...)
     actr.imaginal.state.busy = false
     actr.imaginal.state.empty = false
@@ -167,6 +204,15 @@ function retrieving!(actr, args...; request...)
     register!(actr.scheduler, retrieve!, after, tΔ , actr, chunk; description)
 end
 
+"""
+    retrieve!(actr, chunk, args...; kwargs...)
+
+Completes a memory retrieval by adding chunk to declarative memory buffer and setting
+busy = false and empty = false. Error is set to true if retrieval failure occurs.
+
+- `actr`: an ACT-R model object 
+- `request...`: a variable list of slot-value pairs
+"""
 function retrieve!(actr, chunk, args...; kwargs...)
     actr.declarative.state.busy = false
     actr.declarative.state.empty = false
@@ -192,25 +238,24 @@ function responding!(actr, task, key, args...; kwargs...)
     actr.motor.state.busy = true
     description = "Respond"
     tΔ = rnd_time(.060)
-    register!(actr.scheduler, respond, after, tΔ , actr, task, key;
+    register!(actr.scheduler, respond!, after, tΔ , actr, task, key;
         description)
 end
 
-function respond(actr, task, key)
-    actr.motor.state.busy = false
-    press_key!(task, actr, key)
-end
-
 """
-    press_key!(task::AbstractTask, actr, key)
+    respond!(actr, task, key, args...; kwargs...)
 
-A user-defined function that handles the task events following a keystroke.
+Executes a motor response with user defined `press_key!` function and sets module state to
+busy = false. 
 
-- `task`: a task that is a subtype of `AbstractTask`
 - `actr`: an ACT-R model object 
+- `task`: a task that is a subtype of `AbstractTask`
 - `key`: a string representing a response key
 """
-press_key!(task::AbstractTask, actr, key) = nothing 
+function respond!(actr, task, key)
+    actr.motor.state.busy = false
+    task.press_key!(task, actr, key)
+end
 
 function clear_buffer!(mod::Mod)
     mod.state.empty = true

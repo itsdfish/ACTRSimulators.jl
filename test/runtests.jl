@@ -9,3 +9,5 @@ using SafeTestsets
 @safetestset "Imaginal" begin include("imaginal_test.jl") end
 
 @safetestset "Motor" begin include("motor_test.jl") end
+
+@safetestset "Parallel" begin include("parallel_test.jl") end

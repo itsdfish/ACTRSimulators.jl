@@ -1,34 +1,9 @@
 import ACTRSimulators: start!
 using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
+include("task.jl")
 
-mutable struct SimpleTask{T} <: AbstractTask 
-    scheduler::T
-    visible::Bool
-    realtime::Bool
-    speed::Float64
-    screen::Vector{VisualObject}
-end
-
-function SimpleTask(;scheduler, visible=false, realtime=false, speed=1.0,
-    screen=Vector{VisualObject}())
-    SimpleTask(scheduler, visible, realtime, speed, screen)
-end
-
-function start!(task::SimpleTask, model)
-    isi = 2.0
-    description = "present stimulus"
-    register!(task.scheduler, present_stimulus, after, isi, task, model;
-        description) 
-end
-
-function present_stimulus(task, model)
-    vo = VisualObject(;text="hello")
-    add_to_visicon!(model, vo; stuff=true)
-    push!(task.screen, vo)
-end
-
-scheduler = Scheduler(;trace=true)
+scheduler = Scheduler(;trace=true, store=true)
 task = SimpleTask(;scheduler)
 procedural = Procedural()
 T = vo_to_chunk() |> typeof
@@ -54,3 +29,10 @@ push!(procedural.rules, rule1)
 run!(actr, task)
 chunk = actr.visual_location.buffer[1]
 @test chunk.slots == (color=:black,text="hello")
+
+observed = map(x->x.description, scheduler.complete_events)
+expected = [
+    "Starting", 
+    "Present Stimulus"
+]
+@test expected == observed
