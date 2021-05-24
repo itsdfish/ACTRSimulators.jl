@@ -30,7 +30,7 @@ task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
 
 Now we will initialize the model. The model consists of components for the following modules:
 
--'procedural` memory
+- `procedural` memory
 - `visual_location` 
 - `visual`
 
@@ -58,7 +58,6 @@ The conditions for a production rule is a set of functions that return a `Bool` 
 The model will wait if the `visual_location` and `visual` buffers are empty and the same modules are not busy. 
 
 ```julia 
-
 function can_wait()
     c1(actr, args...; kwargs...) = isempty(actr.visual_location.buffer)
     c2(actr, args...; kwargs...) = isempty(actr.visual.buffer)
