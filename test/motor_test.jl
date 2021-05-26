@@ -14,22 +14,22 @@ memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
 
-function can_attend()
+function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return (c1,c2)
+    return all_match(actr, (c1,c2))
 end  
 
-function can_encode()
+function can_encode(actr)
     c1(actr) = !isempty(actr.visual.buffer)
     c2(actr) = !actr.imaginal.state.busy
-    return (c1,c2)
+    return all_match(actr, (c1,c2))
 end    
 
-function can_respond()
+function can_respond(actr)
     c1(actr) = !isempty(actr.imaginal.buffer)
     c2(actr) = !actr.motor.state.busy
-    return (c1,c2)
+    return all_match(actr, (c1,c2))
 end   
 
 function attend_action(actr, task)
@@ -57,16 +57,13 @@ function motor_action(actr, task)
     return nothing
 end
 
-conditions = can_attend()
-rule1 = Rule(;conditions, action=attend_action, actr, task, name="Attend")
+rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
 
-conditions = can_encode()
-rule2 = Rule(;conditions, action=encode_action, actr, task, name="Encode")
+rule2 = Rule(;conditions=can_encode, action=encode_action, actr, task, name="Encode")
 push!(procedural.rules, rule2)
 
-conditions = can_respond()
-rule3 = Rule(;conditions, action=motor_action, actr, task, name="Respond")
+rule3 = Rule(;conditions=can_respond, action=motor_action, actr, task, name="Respond")
 push!(procedural.rules, rule3)
 
 run!(actr, task)

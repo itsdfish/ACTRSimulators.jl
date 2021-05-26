@@ -14,17 +14,16 @@ memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative) 
 
-function can_stop()
+function can_stop(actr)
     c1(actr) = !actr.visual_location.state.empty
-    return (c1,)
+    return all_match(actr, (c1,))
 end
 
 function stop(actr, task)
     stop!(actr.scheduler)
 end
 
-conditions = can_stop()
-rule1 = Rule(;conditions, action=stop, actr, task, name="Stop")
+rule1 = Rule(;conditions=can_stop, action=stop, actr, task, name="Stop")
 push!(procedural.rules, rule1)
 run!(actr, task)
 chunk = actr.visual_location.buffer[1]

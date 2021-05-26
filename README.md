@@ -58,12 +58,12 @@ The conditions for a production rule is a set of functions that return a `Bool` 
 The model will wait if the `visual_location` and `visual` buffers are empty and the same modules are not busy. 
 
 ```julia 
-function can_wait()
+function can_wait(actr)
     c1(actr) = isempty(actr.visual_location.buffer)
     c2(actr) = isempty(actr.visual.buffer)
     c3(actr) = !actr.visual.state.busy
     c4(actr) = !actr.motor.state.busy
-    return (c1,c2,c3,c4)
+    return all_match(actr, (c1,c2,c3,c4))
 end
 ```
 
@@ -72,10 +72,10 @@ end
 Upon stimulus presentation, a visual object is "stuffed" into the `visual_location` buffer. The `attend` production rule will execute if the `visual_location` buffer is not empty and the `visual` module is not busy. 
 
 ```julia 
-function can_attend()
+function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return (c1,c2)
+    return all_match(actr, (c1,c2))
 end
 ```
 ### Respond
@@ -83,10 +83,10 @@ end
 Once the model attends to the stimulus, it can execute a response. The `respond` production rule will fire if the `visual` buffer is not empty and the `motor` module is not busy. 
 
 ```julia 
-function can_respond()
+function can_respond(actr)
     c1(actr) = !isempty(actr.visual.buffer)
     c2(actr) = !actr.motor.state.busy
-    return (c1,c2)
+    return all_match(actr, (c1,c2))
 end
 ```
 
@@ -110,7 +110,7 @@ end
 When the `attend` production rule is selected, the chunk in the `visual_location` buffer is copied and passed to the function `attending`, which adds the chunk after a time delay that represents the time to shift visual attention. In addition, the buffer for `visual_location` is immediately cleared.
 
 ```julia 
-function attend_action(actr, task)
+function attend_action(actr, args...)
     buffer = actr.visual_location.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual_location)

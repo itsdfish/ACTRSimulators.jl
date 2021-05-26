@@ -14,20 +14,20 @@ memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
 
-function can_attend()
-    c1(actr, args...; kwargs...) = !isempty(actr.visual_location.buffer)
-    c2(actr, args...; kwargs...) = !actr.visual.state.busy
-    return (c1,c2)
+function can_attend(actr)
+    c1(actr) = !isempty(actr.visual_location.buffer)
+    c2(actr) = !actr.visual.state.busy
+    return all_match(actr, (c1,c2))
 end     
 
-function can_respond()
-    c1(actr, args...; kwargs...) = !isempty(actr.visual.buffer)
-    c2(actr, args...; kwargs...) = !actr.motor.state.busy
-    c3(actr, args...; kwargs...) = !actr.imaginal.state.busy
-    return (c1,c2,c3)
+function can_respond(actr)
+    c1(actr) = !isempty(actr.visual.buffer)
+    c2(actr) = !actr.motor.state.busy
+    c3(actr) = !actr.imaginal.state.busy
+    return all_match(actr, (c1,c2,c3))
 end   
 
-function attend_action(actr, task, args...; kwargs...)
+function attend_action(actr, task)
     buffer = actr.visual_location.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual_location)
@@ -35,7 +35,7 @@ function attend_action(actr, task, args...; kwargs...)
     return nothing
 end
 
-function motor_action(actr, task, args...; kwargs...)
+function motor_action(actr, task)
     buffer = actr.visual.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual)
@@ -46,12 +46,10 @@ function motor_action(actr, task, args...; kwargs...)
     return nothing
 end
 
-conditions = can_attend()
-rule1 = Rule(;conditions, action=attend_action, actr, task, name="Attend")
+rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
 
-conditions = can_respond()
-rule2 = Rule(;conditions, action=motor_action, actr, task, name="Respond")
+rule2 = Rule(;conditions=can_respond, action=motor_action, actr, task, name="Respond")
 push!(procedural.rules, rule2)
 
 run!(actr, task)

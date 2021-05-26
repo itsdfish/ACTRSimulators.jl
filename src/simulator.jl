@@ -16,7 +16,7 @@ function run!(actr, task::AbstractTask, until=Inf)
     while is_running(s, until)
         next_event!(s, actr, task)
     end
-    s.trace && !s.running ? print_event(s.time, "", "stopped") : nothing
+    s.trace && !s.running ? print_event(s.time, "", "Stopped") : nothing
     return nothing
 end
 
@@ -158,7 +158,7 @@ created by a visual object
 - `chunk`: a memory chunk 
 
 """
-function attending!(actr, chunk, args...; kwargs...)
+function attending!(actr, chunk)
     actr.visual.state.busy = true
     description = "Attend"
     tΔ = rnd_time(.085)
@@ -175,7 +175,7 @@ states to busy = false and empty = false.
 - `chunk`: a memory chunk 
 
 """
-function attend!(actr, chunk, args...; kwargs...)
+function attend!(actr, chunk)
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
@@ -191,7 +191,7 @@ Sets imaginal module as busy and registers a new event to create a new `chunk`
 - `chunk`: a memory chunk 
 
 """
-function encoding!(actr, chunk, args...; kwargs...)
+function encoding!(actr, chunk)
     actr.imaginal.state.busy = true
     description = "Create New Chunk"
     tΔ = rnd_time(.200)
@@ -208,7 +208,7 @@ states are set to busy = false and empty = false.
 - `chunk`: a memory chunk 
 
 """
-function encode!(actr, chunk, args...; kwargs...)
+function encode!(actr, chunk)
     actr.imaginal.state.busy = false
     actr.imaginal.state.empty = false
     add_to_buffer!(actr.imaginal, chunk)
@@ -224,7 +224,7 @@ a new event for the retrieval
 - `actr`: an ACT-R model object 
 - `request...`: a variable list of slot-value pairs
 """
-function retrieving!(actr, args...; request...)
+function retrieving!(actr; request...)
     actr.declarative.state.busy = true
     description = "Retrieve"
     cur_time = get_time(actr)
@@ -242,7 +242,7 @@ busy = false and empty = false. Error is set to true if retrieval failure occurs
 - `actr`: an ACT-R model object 
 - `request...`: a variable list of slot-value pairs
 """
-function retrieve!(actr, chunk, args...; kwargs...)
+function retrieve!(actr, chunk)
     actr.declarative.state.busy = false
     actr.declarative.state.empty = false
     if isempty(chunk)
@@ -314,4 +314,11 @@ vo_to_chunk(vo=VisualObject()) = Chunk(;color=vo.color, text=vo.text)
 function vo_to_chunk(actr, vo)
     time_created = get_time(actr)
     return Chunk(;time_created, color=vo.color, text=vo.text)
+end
+
+function all_match(actr, conditions)
+    for c in conditions
+        !c(actr) ? (return false) : nothing
+    end
+    return true 
 end

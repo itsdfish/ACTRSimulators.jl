@@ -13,14 +13,14 @@ memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
 
-function can_retrieve()
+function can_retrieve(actr)
     c1(actr) = !actr.declarative.state.busy
-    return (c1,)
+    return all_match(actr, (c1,))
 end
 
-function can_stop()
+function can_stop(actr)
     c1(actr) = !actr.declarative.state.empty
-    return (c1,)
+    return all_match(actr, (c1,))
 end
 
 function retrieve_chunk(actr, task)
@@ -31,12 +31,10 @@ function stop(actr, task)
     stop!(actr.scheduler)
 end
 
-conditions = can_retrieve()
-rule1 = Rule(;conditions, action=retrieve_chunk, actr, task, name="Retrieve")
+rule1 = Rule(;conditions=can_retrieve, action=retrieve_chunk, actr, task, name="Retrieve")
 push!(procedural.rules, rule1)
 
-conditions = can_stop()
-rule2 = Rule(;conditions, action=stop, actr, task, name="Stop")
+rule2 = Rule(;conditions=can_stop, action=stop, actr, task, name="Stop")
 push!(procedural.rules, rule2)
 run!(actr, task)
 chunk = actr.declarative.buffer[1]
