@@ -1,7 +1,7 @@
 name = "ACTRSimulators"
 uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
 authors = ["itsdfish"]
-version = "0.1.2"
+version = "0.1.1"
 
 [deps]
 ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
