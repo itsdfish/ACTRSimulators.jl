@@ -16,10 +16,10 @@ include("PVT.jl")
 include("PVT_Model.jl")
 ```
 
-Next, create an event scheduler as follows. When the option `trace` is set to true, a description and execution time will print for each processed event. 
+Next, create an event scheduler as follows. When the option `model_trace` is set to true, a description and execution time will print for each processed model event. Task events can be added to the trace with `task_trace`. 
 
 ```julia 
-scheduler = Scheduler(;trace=true)
+scheduler = ACTRScheduler(;model_trace=true)
 ```
 
 A task object is created with the `PVT` constructor, which includes options for the number of trials, whether the GUI is visible and whether the task executes in real time. 
@@ -47,7 +47,7 @@ actr = ACTR(;scheduler, procedural, visual_location, visual, motor)
 
 # Production Rules
 
-A production rule consists of two sets of higher order functions: one set for the conditions and another set for the actions. The PVT model uses three production rules: `wait` for the stimulus to appear, `attend` to the stimulus once it appears, `respond` to the stimulus after attending to it. 
+A production rule consists of higher order functions: one for the conditions and another for the actions. The PVT model uses three production rules: `wait` for the stimulus to appear, `attend` to the stimulus once it appears, `respond` to the stimulus after attending to it. 
 
 ## Conditions
 

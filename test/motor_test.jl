@@ -3,7 +3,7 @@ using ACTRSimulators, Test, ACTRModels, Random
 Random.seed!(8985)
 include("task.jl")
 
-scheduler = Scheduler(;trace=true, store=true)
+scheduler = ACTRScheduler(;model_trace=true, store=true)
 task = SimpleTask(;scheduler)
 procedural = Procedural()
 T = vo_to_chunk() |> typeof

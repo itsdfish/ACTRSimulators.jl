@@ -1,11 +1,12 @@
 name = "ACTRSimulators"
 uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
 authors = ["itsdfish"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
 Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
+ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DiscreteEventsLite = "8b1724b8-7d2d-4f3a-bca2-6234a697fafb"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
@@ -14,7 +15,6 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 
 [compat]
-ACTRModels = "0.6"
 Cairo = "v1.0.0"
 DataStructures = "v0.18.0"
 DiscreteEventsLite = "v0.1.0"

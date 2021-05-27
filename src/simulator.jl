@@ -1,4 +1,119 @@
 """
+*AbstractTask*
+
+An abstract type for a task. A task requires the following fields:
+
+- `visible`: shows GUI if true
+- `realtime`: executes model in realtime if true
+- `speed`: speed of realtime model execution
+- `press_key!`: a user-defined function for handling responses, which has the following signature: press_key!(task::Task, actr, key) where
+    `Task` <: `AbstractTask`
+- `start!`: a user-defined function for starting the simulation in `run!`. The function signature is start!(task::Task, actr), where `Task` <: `AbstractTask`
+- `scheduler`: a reference to the event scheduler
+
+A task may optionally contain the following fields:
+
+- `screen`: a vector of visual objects on the screen 
+- `canvas`: a GUI object component
+- `window`: a window for the GUI
+
+*Example*
+
+The following is an example of the task object for the PVT.
+
+```julia
+mutable struct PVT{T,W,C,F1,F2} <: AbstractTask 
+    n_trials::Int
+    trial::Int 
+    lb::Float64
+    ub::Float64 
+    width::Float64
+    hight::Float64
+    scheduler::T
+    screen::Vector{VisualObject}
+    canvas::C
+    window::W
+    visible::Bool
+    realtime::Bool
+    speed::Float64
+    press_key!::F1
+    start!::F2
+end    
+```
+The constructor for `PVT` is 
+
+```julia
+function PVT(;
+    n_trials=10, 
+    trial=1, 
+    lb=2.0, 
+    ub=10.0, 
+    width=600.0, 
+    height=600.0, 
+    scheduler=nothing, 
+    screen=Vector{VisualObject}(), 
+    window=nothing, 
+    canvas=nothing, 
+    visible=false, 
+    realtime=false,
+    speed=1.0,
+    press_key=press_key!,
+    start! =start!
+    )
+    visible ? ((canvas,window) = setup_window(width)) : nothing
+    visible ? Gtk.showall(window) : nothing
+    return PVT(n_trials, trial, lb, ub, width, height, scheduler, screen, canvas, window, visible,
+        realtime, speed, press_key!, start!)
+end
+
+function setup_window(width)
+	canvas = @GtkCanvas()
+    window = GtkWindow(canvas, "PVT", width, width)
+    Gtk.visible(window, true)
+    @guarded draw(canvas) do widget
+        ctx = getgc(canvas)
+        rectangle(ctx, 0.0, 0.0, width, width)
+        set_source_rgb(ctx, .8, .8, .8)
+        fill(ctx)
+    end
+	return canvas,window
+end
+```
+"""
+abstract type AbstractTask end
+
+"""
+Scheduler <: AbstractScheduler
+- `events`: a priority queue of events
+- `time`: current time of the system 
+- `running`: simulation can run if true
+- `trace`: will print out the events if true
+- `store`: will store a vector of completed events if true
+- `complete_events`: an optional vector of completed events
+"""
+mutable struct ACTRScheduler{PQ<:PriorityQueue,E} <: AbstractScheduler
+    events::PQ
+    time::Float64
+    running::Bool
+    model_trace::Bool
+    task_trace::Bool
+    store::Bool
+    complete_events::E
+end
+
+"""
+Constructor for Scheduler with default keyword values:
+
+```julia 
+ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
+```
+"""
+function ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
+    events = PriorityQueue{event,Float64}()
+    return ACTRScheduler(events, time, running, model_trace, task_trace, store, Vector{event}())
+end
+
+"""
     run!(actr, task::AbstractTask, until=Inf)
 
 Simulate an ACT-R model
@@ -16,7 +131,7 @@ function run!(actr, task::AbstractTask, until=Inf)
     while is_running(s, until)
         next_event!(s, actr, task)
     end
-    s.trace && !s.running ? print_event(s.time, "", "Stopped") : nothing
+    s.task_trace && !s.running ? print_event(s.time, "", "Stopped") : nothing
     return nothing
 end
 
@@ -29,7 +144,8 @@ function next_event!(s, actr, task)
     event.fun()
     fire!(actr)
     s.store ? push!(s.complete_events, event) : nothing
-    s.trace ? print_event(event) : nothing
+    s.model_trace && event.type == "model" ? print_event(event) : nothing
+    s.task_trace && event.type !== "model" ? print_event(event) : nothing
     return nothing 
 end
 
@@ -73,10 +189,11 @@ function fire!(actr)
     if !isempty(rules)
         rule = rules[1]
         description = "Selected "*rule.name
+        type = "model"
         tΔ = rnd_time(.05)
         resolving(actr, true)
         f(r, a, v) = (resolving(a, v), r.action()) 
-        register!(actr, f, after, tΔ, rule, actr, false; description)
+        register!(actr, f, after, tΔ, rule, actr, false; description, type)
     end
     return nothing 
 end
@@ -161,8 +278,9 @@ created by a visual object
 function attending!(actr, chunk)
     actr.visual.state.busy = true
     description = "Attend"
+    type = "model"
     tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk; description)
+    register!(actr, attend!, after, tΔ , actr, chunk; description, type)
 end
 
 """
@@ -194,8 +312,10 @@ Sets imaginal module as busy and registers a new event to create a new `chunk`
 function encoding!(actr, chunk)
     actr.imaginal.state.busy = true
     description = "Create New Chunk"
+    type = "model"
     tΔ = rnd_time(.200)
-    register!(actr, encode!, after, tΔ , actr, chunk; description)
+    register!(actr, encode!, after, tΔ , actr, chunk; description, type)
+    return tΔ
 end
 
 """
@@ -227,10 +347,12 @@ a new event for the retrieval
 function retrieving!(actr; request...)
     actr.declarative.state.busy = true
     description = "Retrieve"
+    type = "model"
     cur_time = get_time(actr)
     chunk = retrieve(actr, cur_time; request...)
     tΔ = compute_RT(actr, chunk)
-    register!(actr, retrieve!, after, tΔ , actr, chunk; description)
+    register!(actr, retrieve!, after, tΔ , actr, chunk; description, type)
+    return tΔ
 end
 
 """
@@ -266,9 +388,11 @@ a key stroke
 function responding!(actr, task, key, args...; kwargs...)
     actr.motor.state.busy = true
     description = "Respond"
+    type = "model"
     tΔ = rnd_time(.060)
     register!(actr, respond!, after, tΔ , actr, task, key;
-        description)
+        description, type)
+    return tΔ
 end
 
 """
@@ -286,11 +410,20 @@ function respond!(actr, task, key)
     task.press_key!(task, actr, key)
 end
 
+function clear_buffer!(actr, imaginal::Imaginal)
+    slots = imaginal.buffer[1].slots
+    time = get_time(actr)
+    add_chunk!(actr, time; slots...)
+    clear_buffer!(imaginal)
+    return nothing
+end
+
 function clear_buffer!(mod::Mod)
     mod.state.empty = true
     mod.state.busy = false
     mod.state.error = false
     empty!(mod.buffer)
+    return nothing
 end
 
 remove_chunk!(mod::Mod) = empty!(mod.buffer)
