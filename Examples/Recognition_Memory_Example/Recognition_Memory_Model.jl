@@ -11,16 +11,35 @@ function can_encode(actr)
     c1(actr) = !actr.visual.state.empty
     c2(actr) = !actr.imaginal.state.busy
     c3(actr) = actr.imaginal.state.empty
-    return all_match(actr, (c1,c2,c3))
+    c4(actr) = actr.visual.buffer[1].slots.text != "start test"
+    c5(actr) = actr.goal.buffer[1].slots.goal != :test
+    return all_match(actr, (c1,c2,c3,c4,c5))
 end
 
-function can_respond(actr)
-    c1(actr) = !isempty(actr.visual.buffer)
-    c2(actr) = !actr.motor.state.busy
+function can_start(actr)
+    c1(actr) = !actr.visual.state.empty
+    c2(actr) = actr.visual.buffer[1].slots.text == "start test"
+    return all_match(actr, (c1,c2))
+end
+
+function can_retrieve(actr)
+    c1(actr) = !actr.declarative.state.busy
+    c2(actr) = !actr.visual.state.empty
     c3(actr) = actr.goal.buffer[1].slots.goal == :test
     return all_match(actr, (c1,c2,c3))
 end
 
+function can_respond_yes(actr)
+    c1(actr) = !actr.declarative.state.empty
+    c2(actr) = !actr.motor.state.busy
+    return all_match(actr, (c1,c2))
+end
+
+function can_respond_no(actr)
+    c1(actr) = actr.declarative.state.error
+    c2(actr) = !actr.motor.state.busy
+    return all_match(actr, (c1,c2))
+end
 ###################################################################################################
 #                                        Production Actions
 ###################################################################################################
@@ -43,9 +62,29 @@ function attend_action(actr, args...)
     return nothing
 end
 
-function respond_action(actr, task)
+function start_action(actr, task)
     clear_buffer!(actr.visual)
-    key = "sb"
+    actr.goal.buffer[1].slots = (goal=:test,)
+    register!(actr, ()->(), now; description="start test phase")
+    return nothing
+end
+
+function retrieve_word(actr, task)
+    word = actr.visual.buffer[1].slots.text
+    clear_buffer!(actr.visual)
+    retrieving!(actr; word)
+end
+
+function respond_yes(actr, task)
+    clear_buffer!(actr.declarative)
+    key = "y"
+    responding!(actr, task, key)
+    return nothing
+end
+
+function respond_no(actr, task)
+    clear_buffer!(actr.declarative)
+    key = "n"
     responding!(actr, task, key)
     return nothing
 end

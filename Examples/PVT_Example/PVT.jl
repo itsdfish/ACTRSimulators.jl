@@ -62,19 +62,6 @@ function PVT(;
         realtime, speed, press_key!, start!)
 end
 
-function setup_window(width)
-	canvas = @GtkCanvas()
-    window = GtkWindow(canvas, "PVT", width, width)
-    Gtk.visible(window, true)
-    @guarded draw(canvas) do widget
-        ctx = getgc(canvas)
-        rectangle(ctx, 0.0, 0.0, width, width)
-        set_source_rgb(ctx, .8, .8, .8)
-        fill(ctx)
-    end
-	return canvas,window
-end
-
 function draw_object!(task)
     c = task.canvas
     w = task.width
@@ -92,19 +79,6 @@ function draw_object!(task)
         y′ = y - (extents[4]/2 + extents[2])
         move_to(ctx, x′, y′)
         show_text(ctx, letter)
-    end
-    Gtk.showall(c)
-    return nothing
-end
-
-function clear!(task)
-    c = task.canvas
-    w = task.width
-    @guarded draw(c) do widget
-        ctx = getgc(c)
-        rectangle(ctx, 0, 0, w, w)
-        set_source_rgb(ctx, .8, .8, .8)
-        fill(ctx)
     end
     Gtk.showall(c)
     return nothing

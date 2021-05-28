@@ -24,6 +24,8 @@ Task(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, schedule
 @concrete mutable struct Task <: AbstractTask 
     study_trial::Int
     test_trial::Int 
+    n_blocks::Int
+    block::Int
     width::Float64
     hight::Float64
     scheduler
@@ -38,11 +40,14 @@ Task(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, schedule
     study_words
     test_words
     data
+    test_phase
 end
 
 function Task(;
     study_trial = 1, 
-    test_trial = 1, 
+    test_trial = 1,
+    n_blocks = 1,
+    block = 1, 
     width = 600.0, 
     height = 600.0, 
     scheduler = nothing, 
@@ -56,25 +61,13 @@ function Task(;
     start! = start!,
     study_words = String[],
     test_words = String[],
-    data= nothing
+    data = nothing,
+    test_phase = false
     )
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
-    return Task(study_trial, test_trial, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed, press_key!, start!, study_words, test_words, data)
-end
-
-function setup_window(width)
-	canvas = @GtkCanvas()
-    window = GtkWindow(canvas, "Experiment", width, width)
-    Gtk.visible(window, true)
-    @guarded draw(canvas) do widget
-        ctx = getgc(canvas)
-        rectangle(ctx, 0.0, 0.0, width, width)
-        set_source_rgb(ctx, .8, .8, .8)
-        fill(ctx)
-    end
-	return canvas,window
+    return Task(study_trial, test_trial, n_blocks, block, width, height, scheduler, screen, canvas, window, visible,
+        realtime, speed, press_key!, start!, study_words, test_words, data, test_phase)
 end
 
 function draw_object!(task, word)
@@ -98,19 +91,6 @@ function draw_object!(task, word)
     return nothing
 end
 
-function clear!(task)
-    c = task.canvas
-    w = task.width
-    @guarded draw(c) do widget
-        ctx = getgc(c)
-        rectangle(ctx, 0, 0, w, w)
-        set_source_rgb(ctx, .8, .8, .8)
-        fill(ctx)
-    end
-    Gtk.showall(c)
-    return nothing
-end
-
 function start!(task::Task, actr)
     sort!(task.study_words)
     sort!(task.test_words)
@@ -122,8 +102,6 @@ function present_stimulus(task, actr, word)
     add_to_visicon!(actr, vo; stuff=true)
     push!(task.screen, vo)
     task.visible ? draw_object!(task, word) : nothing
-    register!(task, clear!, after, 1.0, task)
-    register!(task, update_task!, after, 1.0, task, actr)
 end
 
 function study_trial!(task, actr)
@@ -133,19 +111,56 @@ function study_trial!(task, actr)
     word = study_words[study_trial].word
     register!(task, present_stimulus, after, isi, task, actr, word;
         description)
+    task.visible ? register!(task, clear!, after, 1.5, task) : nothing
+    register!(task, update_task!, after, 1.5, task, actr)
+end
+
+function start_test(task, actr)
+    isi = .5
+    description = "start test"
+    word = "start test"
+    register!(task, present_stimulus, after, isi, task, actr, word;
+        description)
+    register!(task, empty!, after, 1.0, task.screen)
+    task.visible ? register!(task, clear!, after, 1.0, task) : nothing
+    register!(task, update_task!, after, 1.0, task, actr)
+
+end
+
+function test_trial!(task, actr)
+    @unpack test_words,test_trial = task
+    isi = .5
+    description = "present stimulus"
+    word = test_words[test_trial].word
+    register!(task, present_stimulus, after, isi, task, actr, word;
+        description)
+end
+
+function update_block!(task)
+    task.study_trial = 0
+    task.block += 1
+    shuffle!(task.study_words)
 end
 
 function update_task!(task, actr)
     if task.study_trial < length(task.study_words)
         task.study_trial += 1
         study_trial!(task, actr)
-    elseif task.test_trial < length(task.test_words)
+        return nothing
+    elseif task.block < task.n_blocks
+        update_block!(task)
+        update_task!(task, actr)
+        return nothing 
+    end
+    if !task.test_phase
+        start_test(task, actr)
+        task.test_phase = true
+        return nothing
+    end
+    if task.test_trial < length(task.test_words)
         task.test_trial += 1
-
-
-        stop!(task.scheduler)
-
-        
+        test_trial!(task, actr)
+        return nothing
     else
         stop!(task.scheduler)
     end

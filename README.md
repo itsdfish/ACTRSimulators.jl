@@ -11,9 +11,10 @@ As a simple example, we will develop an ACT-R model of the psychomotor vigilence
 After installing `ACTRSimulators.jl`, the first step is to load the following dependencies.
 
 ```julia
-using ACTRSimulators, Gtk, Cairo
+using ACTRSimulators
 include("PVT.jl")
 include("PVT_Model.jl")
+import_gui()
 ```
 
 Next, create an event scheduler as follows. When the option `model_trace` is set to true, a description and execution time will print for each processed model event. Task events can be added to the trace with `task_trace`. 

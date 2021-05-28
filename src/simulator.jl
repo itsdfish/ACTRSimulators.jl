@@ -83,11 +83,12 @@ end
 abstract type AbstractTask end
 
 """
-Scheduler <: AbstractScheduler
+ACTRScheduler <: AbstractScheduler
 - `events`: a priority queue of events
 - `time`: current time of the system 
 - `running`: simulation can run if true
-- `trace`: will print out the events if true
+- `model_trace`: will print out model events if true
+- `task_trace`: will print out task events if true
 - `store`: will store a vector of completed events if true
 - `complete_events`: an optional vector of completed events
 """
@@ -137,6 +138,15 @@ end
 
 next_event!(actr, task) = next_event!(actr.scheduler, actr, task)
 
+"""
+    next_event!(s, actr, task)
+
+Dequeue and process a single event. 
+
+- `s`: an event scheduler
+- `actr`: an ACT-R model object 
+- `task`: a task that is a subtype of `AbstractTask`
+"""
 function next_event!(s, actr, task)
     event = dequeue!(s.events)
     pause(task, event)
@@ -186,15 +196,14 @@ Selects a production rule and registers conflict resolution and new events for s
 function fire!(actr)
     actr.procedural.state.busy ? (return nothing) : nothing
     rules = actr.parms.select_rule(actr)
-    if !isempty(rules)
-        rule = rules[1]
-        description = "Selected "*rule.name
-        type = "model"
-        tΔ = rnd_time(.05)
-        resolving(actr, true)
-        f(r, a, v) = (resolving(a, v), r.action()) 
-        register!(actr, f, after, tΔ, rule, actr, false; description, type)
-    end
+    isempty(rules) ? (return nothing) : nothing
+    rule = rules[1]
+    description = "Selected "*rule.name
+    type = "model"
+    tΔ = rnd_time(.05)
+    resolving(actr, true)
+    f(r, a, v) = (resolving(a, v), r.action()) 
+    register!(actr, f, after, tΔ, rule, actr, false; description, type)
     return nothing 
 end
 
@@ -273,7 +282,6 @@ created by a visual object
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
-
 """
 function attending!(actr, chunk)
     actr.visual.state.busy = true
@@ -291,7 +299,6 @@ states to busy = false and empty = false.
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
-
 """
 function attend!(actr, chunk)
     actr.visual.state.busy = false
@@ -307,7 +314,6 @@ Sets imaginal module as busy and registers a new event to create a new `chunk`
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
-
 """
 function encoding!(actr, chunk)
     actr.imaginal.state.busy = true
@@ -326,7 +332,6 @@ states are set to busy = false and empty = false.
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
-
 """
 function encode!(actr, chunk)
     actr.imaginal.state.busy = false
@@ -366,10 +371,10 @@ busy = false and empty = false. Error is set to true if retrieval failure occurs
 """
 function retrieve!(actr, chunk)
     actr.declarative.state.busy = false
-    actr.declarative.state.empty = false
     if isempty(chunk)
         actr.declarative.state.error = true
     else
+        actr.declarative.state.empty = false
         add_to_buffer!(actr.declarative, chunk[1])
     end
     return nothing 
@@ -418,6 +423,15 @@ function clear_buffer!(actr, imaginal::Imaginal)
     return nothing
 end
 
+"""
+    clear_buffer!(mod::Mod)
+
+Removes chunk from buffer and sets buffer state to
+
+- `empty`: true 
+- `busy`: false
+- `error`: false
+"""
 function clear_buffer!(mod::Mod)
     mod.state.empty = true
     mod.state.busy = false
@@ -428,11 +442,29 @@ end
 
 remove_chunk!(mod::Mod) = empty!(mod.buffer)
 
+"""
+    add_to_buffer!(mod::Mod, chunk)
+
+Add chunk to buffer. 
+
+- `mod`: a module
+- `chunk`: a memory chunk 
+"""
 function add_to_buffer!(mod::Mod, chunk)
     remove_chunk!(mod)
     push!(mod.buffer, chunk)
 end
 
+"""
+    add_to_visicon!(actr, vo; stuff=false)
+
+Adds a visual object to the visicon. If `stuff` is set to true, the visual object
+is added to the visual location buffer. 
+
+- `actr`: an ACT-R model object
+- `vo`: visual object 
+- `stuff`: buffer stuffing if true 
+"""
 function add_to_visicon!(actr, vo; stuff=false) 
     push!(actr.visual_location.visicon, deepcopy(vo))
     if stuff 
@@ -442,16 +474,42 @@ function add_to_visicon!(actr, vo; stuff=false)
     return nothing 
 end
 
+"""
+    vo_to_chunk(vo=VisualObject())
+
+Converts visible object to a chunk with color and text slots.
+"""
 vo_to_chunk(vo=VisualObject()) = Chunk(;color=vo.color, text=vo.text)
 
+"""
+    vo_to_chunk(actr, vo)
+
+Converts visible object to a chunk with color and text slots, and sets time created to current time.
+
+- `actr`: an ACT-R model object
+- `vo`: visual object
+"""
 function vo_to_chunk(actr, vo)
     time_created = get_time(actr)
     return Chunk(;time_created, color=vo.color, text=vo.text)
 end
 
+"""
+    all_match(actr, conditions) 
+
+Checks whether all conditions of a production rule are satisfied. 
+
+- `actr`: an ACT-R model object
+- `conditions`: a collection of functions representing production rule conditions.
+"""
 function all_match(actr, conditions)
     for c in conditions
         !c(actr) ? (return false) : nothing
     end
     return true 
+end
+
+function import_gui()
+    path = pathof(ACTRSimulators) |> dirname |> x->joinpath(x, "")
+    include(path*"GUI.jl")
 end

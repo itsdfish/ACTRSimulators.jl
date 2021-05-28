@@ -4,7 +4,8 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
-using Revise, ACTRSimulators, Gtk, Cairo
+using Revise, ACTRSimulators
+import_gui()
 include("PVT.jl")
 include("PVT_Model.jl")
 ###################################################################################################

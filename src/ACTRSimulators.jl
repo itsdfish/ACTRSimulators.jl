@@ -7,7 +7,7 @@ module ACTRSimulators
     import ACTRModels: AbstractACTR
     export run!, next_event!, register!, vo_to_chunk, add_to_visicon!, clear_buffer!, add_to_buffer!, get_time, attending!
     export attend!, retrieving!, retrieve!, responding!, respond!
-    export encoding!, encode!, all_match, AbstractTask, ACTRScheduler
+    export encoding!, encode!, all_match, AbstractTask, ACTRScheduler, clear!, setup_window, import_gui
 
     include("simulator.jl")
 end
