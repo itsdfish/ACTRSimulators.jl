@@ -281,14 +281,16 @@ Sets visual module as busy and registers a new event to attend to a `chunk`
 created by a visual object
 
 - `actr`: an ACT-R model object 
-- `chunk`: a memory chunk 
+- `chunk`: a memory chunk
+- `x`: x coordinate of visual object. Default 0.
+- `y`: y coordinate of visual object. Default 0. 
 """
-function attending!(actr, chunk)
+function attending!(actr, chunk, x=0.0, y=0.0)
     actr.visual.state.busy = true
     description = "Attend"
     type = "model"
     tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk; description, type)
+    register!(actr, attend!, after, tΔ , actr, chunk, x, y; description, type)
 end
 
 """
@@ -300,7 +302,8 @@ states to busy = false and empty = false.
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
 """
-function attend!(actr, chunk)
+function attend!(actr, chunk, x, y)
+    actr.visual.focus = [x,y]
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
@@ -475,6 +478,39 @@ function add_to_visicon!(actr, vo; stuff=false)
 end
 
 """
+    clear_visicon!(actr)
+
+Clear all visual objects in visicon
+"""
+function clear_visicon!(visicon)
+    empty!(visicon)
+end
+
+clear_visicon!(actr::AbstractACTR) = clear_visicon!(actr.visual_location.visicon)
+
+"""
+    remove_visual_object!(actr::AbstractACTR, vo)
+
+Removes object from visicon. 
+
+- `actr`: an ACT-R model object 
+- `vo`: a visual object 
+"""
+remove_visual_object!(actr::AbstractACTR, vo) = remove_visual_object!(actr.visual_location.visicon, vo)
+
+"""
+    remove_visual_object!(visicon, vo)
+
+Removes object from visicon. 
+
+- `visicon`: a vector of visual objects
+- `vo`: a visual object 
+"""
+function remove_visual_object!(visicon, vo)
+    filter!(x->x != vo, visicon)
+end
+
+"""
     vo_to_chunk(vo=VisualObject())
 
 Converts visible object to a chunk with color and text slots.
@@ -511,5 +547,5 @@ end
 
 function import_gui()
     path = pathof(ACTRSimulators) |> dirname |> x->joinpath(x, "")
-    include(path*"GUI.jl")
+    include(path * "GUI.jl")
 end

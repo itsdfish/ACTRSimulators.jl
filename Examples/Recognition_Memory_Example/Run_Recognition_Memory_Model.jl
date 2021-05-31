@@ -4,7 +4,7 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
-using Revise, ConcreteStructs, ACTRSimulators
+using Revise, ConcreteStructs, ACTRSimulators, DataFrames, FreqTables
 import_gui()
 include("Recognition_Memory_Task.jl")
 include("Recognition_Memory_Model.jl")
@@ -14,7 +14,8 @@ include("Recognition_Memory_Model.jl")
 parms = (bll=true,noise=true, d=.5, s=.2,τ = 0.0, blc=1.0)
 scheduler = ACTRScheduler(;model_trace=true)
 stimuli = populate_lists()
-task = Task(;scheduler, visible=true, realtime=true, n_blocks=2, stimuli...)
+data = DataFrame(word=String[], type=String[], response=String[])
+task = Task(;scheduler, visible=true, realtime=true, n_blocks=2, data, stimuli...)
 procedural = Procedural()
 T = Chunk(;word="") |> typeof
 imaginal = Imaginal(;buffer=T[])
@@ -39,3 +40,8 @@ push!(procedural.rules, rule5)
 rule6 = Rule(;conditions=can_respond_no, action=respond_no, actr, task, name="Respond No")
 push!(procedural.rules, rule6);
 run!(actr, task)
+###################################################################################################
+#                                        Analyze Responses
+###################################################################################################
+table = freqtable(task.data, :type, :response) |> prop
+table /= .5

@@ -41,6 +41,7 @@ Task(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, schedule
     test_words
     data
     test_phase
+    test_word::NamedTuple
 end
 
 function Task(;
@@ -62,12 +63,13 @@ function Task(;
     study_words = String[],
     test_words = String[],
     data = nothing,
-    test_phase = false
+    test_phase = false,
+    test_word = (a=1,)
     )
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return Task(study_trial, test_trial, n_blocks, block, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed, press_key!, start!, study_words, test_words, data, test_phase)
+        realtime, speed, press_key!, start!, study_words, test_words, data, test_phase, test_word)
 end
 
 function draw_object!(task, word)
@@ -124,14 +126,14 @@ function start_test(task, actr)
     register!(task, empty!, after, 1.0, task.screen)
     task.visible ? register!(task, clear!, after, 1.0, task) : nothing
     register!(task, update_task!, after, 1.0, task, actr)
-
 end
 
 function test_trial!(task, actr)
     @unpack test_words,test_trial = task
     isi = .5
     description = "present stimulus"
-    word = test_words[test_trial].word
+    task.test_word = test_words[test_trial]
+    word = task.test_word.word
     register!(task, present_stimulus, after, isi, task, actr, word;
         description)
 end
@@ -143,20 +145,24 @@ function update_block!(task)
 end
 
 function update_task!(task, actr)
+    # run through training trials
     if task.study_trial < length(task.study_words)
         task.study_trial += 1
         study_trial!(task, actr)
         return nothing
+    # repeat training block 
     elseif task.block < task.n_blocks
         update_block!(task)
         update_task!(task, actr)
         return nothing 
     end
+    # signal switch to test trials
     if !task.test_phase
         start_test(task, actr)
         task.test_phase = true
         return nothing
     end
+    # run through test trails
     if task.test_trial < length(task.test_words)
         task.test_trial += 1
         test_trial!(task, actr)
@@ -167,6 +173,8 @@ function update_task!(task, actr)
 end
 
 function press_key!(task::Task, actr, key)
+    @unpack data,test_word = task 
+    push!(data, [test_word.word test_word.type key])
     empty!(task.screen)
     task.visible ? clear!(task) : nothing
     update_task!(task, actr)
@@ -191,13 +199,14 @@ function populate_lists()
         (word="shirt",type="target"),
         (word="tree",type="target"),
 
-        (word="rug",type="target"),
-        (word="car",type="target"),
-        (word="pool",type="target"),
-        (word="lump",type="target"),
-        (word="hair",type="target"),
-        (word="face",type="target"),
-        (word="ape",type="target")
+        (word="rug",type="foil"),
+        (word="car",type="foil"),
+        (word="pool",type="foil"),
+        (word="lump",type="foil"),
+        (word="hair",type="foil"),
+        (word="face",type="foil"),
+        (word="harp",type="foil"),
+        (word="ape",type="foil")
     ]
     stimuli = (study_words=study_words, test_words=test_words)
     return stimuli
