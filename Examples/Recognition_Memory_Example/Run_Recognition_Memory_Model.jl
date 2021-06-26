@@ -24,9 +24,10 @@ goal = Goal(;buffer=Chunk(;goal=:study))
 T = vo_to_chunk() |> typeof
 visual_location = VisualLocation(buffer=T[])
 visual = Visual(buffer=T[])
+visicon = VisualObject[]
 motor = Motor()
 actr = ACTR(;scheduler, imaginal, procedural, goal, visual_location, 
-    declarative, visual, motor, parms...)
+    declarative, visual, motor, visicon, parms...)
 rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
 rule2 = Rule(;conditions=can_encode, action=encode_action, actr, task, name="Encode")

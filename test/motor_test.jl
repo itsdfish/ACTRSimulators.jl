@@ -9,10 +9,11 @@ procedural = Procedural()
 T = vo_to_chunk() |> typeof
 visual_location = VisualLocation(buffer=T[])
 visual = Visual(buffer=T[])
+visicon = VisualObject[]
 motor = Motor()
 memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
-actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
+actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative, visicon)
 
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)

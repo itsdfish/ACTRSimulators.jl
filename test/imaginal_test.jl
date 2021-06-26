@@ -9,10 +9,11 @@ procedural = Procedural()
 T = vo_to_chunk() |> typeof
 visual_location = VisualLocation(buffer=T[])
 visual = Visual(buffer=T[])
+visicon = VisualObject[]
 motor = Motor()
 memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
 declarative = Declarative(;memory)
-actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative)
+actr = ACTR(;scheduler, visicon, procedural, visual_location, visual, motor, declarative)
 
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
@@ -62,7 +63,7 @@ push!(procedural.rules, rule3)
 
 run!(actr, task)
 chunk = actr.imaginal.buffer[1]
-@test chunk.slots == (color=:black,text="hello")
+@test chunk.slots == (color = :black, text = "hello", x = 300.0, y = 300.0)
 
 observed = map(x->x.description, scheduler.complete_events)
 expected = [
