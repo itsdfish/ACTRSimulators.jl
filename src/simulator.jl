@@ -282,15 +282,21 @@ created by a visual object
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk
-- `x`: x coordinate of visual object. Default 0.
-- `y`: y coordinate of visual object. Default 0. 
 """
-function attending!(actr, chunk, x=0.0, y=0.0)
+function attending!(actr, chunk)
     actr.visual.state.busy = true
     description = "Attend"
     type = "model"
     tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk, x, y; description, type)
+    register!(actr, attend!, after, tΔ , actr, chunk; description, type)
+end
+
+function attending!(actr, chunk, task)
+    actr.visual.state.busy = true
+    description = "Attend"
+    type = "model"
+    tΔ = rnd_time(.085)
+    register!(actr, attend!, after, tΔ , actr, chunk, task; description, type)
 end
 
 """
@@ -302,11 +308,22 @@ states to busy = false and empty = false.
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
 """
-function attend!(actr, chunk, x, y)
-    actr.visual.focus = [x,y]
+function attend!(actr, chunk)
+    slots = chunk.slots
+    actr.visual.focus = [slots.x,slots.y]
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
+    return nothing 
+end
+
+function attend!(actr, chunk, task)
+    slots = chunk.slots
+    actr.visual.focus = [slots.x,slots.y]
+    actr.visual.state.busy = false
+    actr.visual.state.empty = false
+    add_to_buffer!(actr.visual, chunk)
+    task.visible ? draw_attention!(task, actr) : nothing
     return nothing 
 end
 
@@ -469,7 +486,7 @@ is added to the visual location buffer.
 - `stuff`: buffer stuffing if true 
 """
 function add_to_visicon!(actr, vo; stuff=false) 
-    push!(actr.visual_location.visicon, deepcopy(vo))
+    push!(actr.visicon, deepcopy(vo))
     if stuff 
        chunk = vo_to_chunk(actr, vo)
        add_to_buffer!(actr.visual_location, chunk)
@@ -486,7 +503,7 @@ function clear_visicon!(visicon)
     empty!(visicon)
 end
 
-clear_visicon!(actr::AbstractACTR) = clear_visicon!(actr.visual_location.visicon)
+clear_visicon!(actr::AbstractACTR) = clear_visicon!(actr.visicon)
 
 """
     remove_visual_object!(actr::AbstractACTR, vo)
@@ -515,7 +532,9 @@ end
 
 Converts visible object to a chunk with color and text slots.
 """
-vo_to_chunk(vo=VisualObject()) = Chunk(;color=vo.color, text=vo.text)
+function vo_to_chunk(vo=VisualObject())
+     return Chunk(;color=vo.color, text=vo.text, x=vo.x, y=vo.y)
+end
 
 """
     vo_to_chunk(actr, vo)
@@ -527,7 +546,13 @@ Converts visible object to a chunk with color and text slots, and sets time crea
 """
 function vo_to_chunk(actr, vo)
     time_created = get_time(actr)
-    return Chunk(;time_created, color=vo.color, text=vo.text)
+    return Chunk(;time_created, color=vo.color, text=vo.text, x=vo.x, y=vo.y)
+end
+
+function move_vo!(actr, x, y)
+    vo = actr.visicon[1]
+    vo.x = x
+    vo.y = y
 end
 
 """

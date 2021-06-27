@@ -62,28 +62,6 @@ function PVT(;
         realtime, speed, press_key!, start!)
 end
 
-function draw_object!(task)
-    c = task.canvas
-    w = task.width
-	x = w/2
-	y = w/2
-    letter = "X"
-    @guarded draw(c) do widget
-        ctx = getgc(c)
-        select_font_face(ctx, "Arial", Cairo.FONT_SLANT_NORMAL,
-             Cairo.FONT_WEIGHT_BOLD);
-        set_font_size(ctx, 36)
-        set_source_rgb(ctx, 0, 0, 0)
-        extents = text_extents(ctx, letter)
-        x′ = x - (extents[3]/2 + extents[1])
-        y′ = y - (extents[4]/2 + extents[2])
-        move_to(ctx, x′, y′)
-        show_text(ctx, letter)
-    end
-    Gtk.showall(c)
-    return nothing
-end
-
 function start!(task::PVT, actr)
     run_trial!(task, actr)
 end
@@ -96,7 +74,8 @@ function present_stimulus(task, actr)
     vo = VisualObject()
     add_to_visicon!(actr, vo; stuff=true)
     push!(task.screen, vo)
-    task.visible ? draw_object!(task) : nothing
+    w = task.width / 2
+    task.visible ? draw_object!(task, "X", w, w) : nothing
 end
 
 function run_trial!(task, actr)

@@ -4,15 +4,15 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
-using Revise, ACTRSimulators
+using Revise, ACTRSimulators, ConcreteStructs
 import_gui()
-include("PVT.jl")
-include("PVT_Model.jl")
+include("tracking_task.jl")
+include("tracking_model.jl")
 ###################################################################################################
 #                                        Run Model
 ###################################################################################################
 scheduler = ACTRScheduler(;model_trace=true)
-task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
+task = Tracking(;scheduler, visible=true, realtime=true)
 procedural = Procedural()
 T = vo_to_chunk() |> typeof
 visual_location = VisualLocation(buffer=T[])
@@ -22,8 +22,6 @@ motor = Motor()
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, visicon)
 rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
-rule2 = Rule(;conditions=can_wait, action=wait_action, actr, task, name="Wait")
-push!(procedural.rules, rule2)
 rule3 = Rule(;conditions=can_respond, action=respond_action, actr, task, name="Respond")
 push!(procedural.rules, rule3)
-run!(actr, task)
+run!(actr, task, 30.0)
