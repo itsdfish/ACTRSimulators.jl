@@ -9,6 +9,7 @@ module ACTRSimulators
     export attend!, retrieving!, retrieve!, responding!, respond!
     export encoding!, encode!, all_match, AbstractTask, ACTRScheduler, clear!, setup_window, import_gui
     export draw_object!, draw_attention!, remove_visual_object!, clear_visicon!, move_vo!
+    export repaint!
     
     include("simulator.jl")
 end

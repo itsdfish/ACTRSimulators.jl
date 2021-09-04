@@ -323,7 +323,7 @@ function attend!(actr, chunk, task)
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
-    task.visible ? draw_attention!(task, actr) : nothing
+    task.visible ? task.repaint!(task, actr) : nothing
     return nothing 
 end
 

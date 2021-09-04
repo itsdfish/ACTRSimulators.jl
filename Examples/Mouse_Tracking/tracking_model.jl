@@ -13,14 +13,15 @@ function can_wait(actr)
     return all_match(actr, (c1,c2,c3,c4))
 end
 
+function can_find(actr)
+    c1(actr) = isempty(actr.visual_location.buffer)
+    c2(actr) = !actr.visual.state.busy
+    all_match(actr, (c1,c2))
+end
+
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-
-
-    return false
-
-
     return all_match(actr, (c1,c2))
 end
 
@@ -36,11 +37,18 @@ end
 ###################################################################################################
 #                                        Production Actions
 ###################################################################################################
-function attend_action(actr, args...)
+function find_action(actr, args...)
+    vo = actr.visicon[1]
+    chunk = vo_to_chunk(actr, vo)
+    add_to_buffer!(actr.visual_location, chunk)
+    return nothing
+end
+
+function attend_action(actr, task, args...)
     buffer = actr.visual_location.buffer
     chunk = deepcopy(buffer[1])
     clear_buffer!(actr.visual_location)
-    attending!(actr, chunk)
+    attending!(actr, chunk, task)
     return nothing
 end
 

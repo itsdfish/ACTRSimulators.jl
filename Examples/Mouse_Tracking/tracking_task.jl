@@ -34,6 +34,7 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     λθ::Float64
     press_key!
     start!
+    repaint!
 end
 
 function Tracking(;
@@ -50,6 +51,7 @@ function Tracking(;
     speed = 1.0,
     press_key = press_key!,
     start! = start!,
+    repaint! = repaint!,
     λθ = .01,
     revs_per_sec = 10,
     Δθ = (2 * π) * λθ * (1 / revs_per_sec)
@@ -71,7 +73,8 @@ function Tracking(;
         Δθ,
         λθ,
         press_key!, 
-        start!
+        start!,
+        repaint!
     )
 end
 
@@ -115,15 +118,12 @@ function get_position(dot)
 end
 
 function update_angle!(dot, Δθ)
-    θ = mod(dot.θ + Δθ, 2 * π)
-    dot.θ = θ
+    dot.θ = mod(dot.θ + Δθ, 2 * π)
 end
 
 function update_dot!(task, actr)
     update_angle!(task.dot, task.Δθ)
     compute_position!(task.dot)
-    clear!(task)
-    draw_object!(task, task.dot)
 end
 
 function update_vo!(actr, task)
@@ -134,6 +134,7 @@ end
 function move_dot!(actr, task)
     update_dot!(task, actr)
     update_vo!(actr, task)
+    repaint!(task, actr)
 end
 
 mutable struct Cursor
@@ -154,10 +155,10 @@ function start!(task::Tracking, actr)
 end
 
 function present_stimulus(task, actr, dot)
-    vo = VisualObject()
+    vo = VisualObject(;x = dot.x, y = dot.y)
     add_to_visicon!(actr, vo; stuff=true)
     push!(task.screen, vo)
-    task.visible ? draw_object!(task, dot) : nothing
+    task.visible ? task.repaint!(task, actr) : nothing
 end
 
 function run_trial!(task, actr)
@@ -167,4 +168,10 @@ end
 
 function press_key!(task::Tracking, actr, key)
     println("press_key not implimented")
+end
+
+function repaint!(task::Tracking, actr)
+    clear!(task)
+    draw_object!(task, task.dot)
+    draw_attention!(task, actr) 
 end

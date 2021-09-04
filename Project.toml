@@ -16,7 +16,7 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 
 [compat]
-ACTRModels = "v0.7.0"
+ACTRModels = "v0.8.0"
 Cairo = "v1.0.0"
 ConcreteStructs = "v0.2.0"
 DataFrames = "1"

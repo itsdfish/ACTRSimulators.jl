@@ -22,6 +22,10 @@ motor = Motor()
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, visicon)
 rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
-rule3 = Rule(;conditions=can_respond, action=respond_action, actr, task, name="Respond")
+rule2 = Rule(;conditions=can_respond, action=respond_action, actr, task, name="Respond")
+push!(procedural.rules, rule2)
+
+rule3 = Rule(;conditions=can_find, action=find_action, actr, task, name="Find")
 push!(procedural.rules, rule3)
+
 run!(actr, task, 30.0)

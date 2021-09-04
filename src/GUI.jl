@@ -75,3 +75,7 @@ function draw_object!(task, object, x, y)
     Gtk.showall(c)
     return nothing
 end
+
+function repaint!(task::AbstractTask, actr)
+    draw_attention!(task, actr) 
+end
