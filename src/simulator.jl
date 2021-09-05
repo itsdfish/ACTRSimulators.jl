@@ -6,9 +6,6 @@ An abstract type for a task. A task requires the following fields:
 - `visible`: shows GUI if true
 - `realtime`: executes model in realtime if true
 - `speed`: speed of realtime model execution
-- `press_key!`: a user-defined function for handling responses, which has the following signature: press_key!(task::Task, actr, key) where
-    `Task` <: `AbstractTask`
-- `start!`: a user-defined function for starting the simulation in `run!`. The function signature is start!(task::Task, actr), where `Task` <: `AbstractTask`
 - `scheduler`: a reference to the event scheduler
 
 A task may optionally contain the following fields:
@@ -36,8 +33,6 @@ mutable struct PVT{T,W,C,F1,F2} <: AbstractTask
     visible::Bool
     realtime::Bool
     speed::Float64
-    press_key!::F1
-    start!::F2
 end    
 ```
 The constructor for `PVT` is 
@@ -57,13 +52,11 @@ function PVT(;
     visible=false, 
     realtime=false,
     speed=1.0,
-    press_key=press_key!,
-    start! =start!
     )
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return PVT(n_trials, trial, lb, ub, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed, press_key!, start!)
+        realtime, speed)
 end
 
 function setup_window(width)
@@ -83,7 +76,12 @@ end
 abstract type AbstractTask end
 
 """
-ACTRScheduler <: AbstractScheduler
+    ACTRScheduler <: AbstractScheduler
+
+An ACT-R event scheduler object. 
+
+# Fields 
+
 - `events`: a priority queue of events
 - `time`: current time of the system 
 - `running`: simulation can run if true
@@ -91,6 +89,7 @@ ACTRScheduler <: AbstractScheduler
 - `task_trace`: will print out task events if true
 - `store`: will store a vector of completed events if true
 - `complete_events`: an optional vector of completed events
+
 """
 mutable struct ACTRScheduler{PQ<:PriorityQueue,E} <: AbstractScheduler
     events::PQ
@@ -103,11 +102,18 @@ mutable struct ACTRScheduler{PQ<:PriorityQueue,E} <: AbstractScheduler
 end
 
 """
+    ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
+
 Constructor for Scheduler with default keyword values:
 
-```julia 
-ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
-```
+# Keywords 
+
+- `event`: a function that is executed at the specified time
+- `time`: the time at which the event will be execute
+- `running`: whether the model is running 
+- `model_trace`: prints model trace if true
+- `task_trace`: prints task trace if true 
+- `store`: stores the executed events for replay if set to true 
 """
 function ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
     events = PriorityQueue{event,Float64}()
@@ -119,6 +125,8 @@ end
 
 Simulate an ACT-R model
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `task`: a task that is a subtype of `AbstractTask`
 - `until`: a specified termination time unless terminated sooner manually. Default is Inf
@@ -126,7 +134,7 @@ Simulate an ACT-R model
 function run!(actr, task::AbstractTask, until=Inf)
     s = task.scheduler
     last_event!(s, until)
-    task.start!(task, actr)
+    start!(task, actr)
     start!(actr)
     fire!(actr)
     while is_running(s, until)
@@ -142,6 +150,8 @@ next_event!(actr, task) = next_event!(actr.scheduler, actr, task)
     next_event!(s, actr, task)
 
 Dequeue and process a single event. 
+
+# Arguments 
 
 - `s`: an event scheduler
 - `actr`: an ACT-R model object 
@@ -164,6 +174,8 @@ end
 
 Pauses simulation for specified `speed` if `realtime` in `task` is true.
 
+# Arguments 
+
 - `task`: a task that is a subtype of `AbstractTask`
 - `event`: a task event or an internal event of the model
 """
@@ -179,10 +191,12 @@ end
 
 A function that initializes the simulation for the model.
 
+# Arguments 
+
 - `task`: a task that is a subtype of `AbstractTask`
 - `actr`: an ACT-R model object 
 """
-function start!(actr)
+function start!(actr::AbstractACTR)
     register!(actr, ()->(), now; description="Starting")
 end
 
@@ -190,6 +204,8 @@ end
     fire!(actr)
 
 Selects a production rule and registers conflict resolution and new events for selected production rule
+
+# Arguments 
 
 - `actr`: an ACT-R model object 
 """
@@ -280,6 +296,8 @@ end
 Sets visual module as busy and registers a new event to attend to a `chunk`
 created by a visual object
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk
 """
@@ -305,6 +323,8 @@ end
 Completes an attention shift by adding a `chunk` to the visual buffer and setting
 states to busy = false and empty = false.
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
 """
@@ -323,7 +343,7 @@ function attend!(actr, chunk, task)
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
-    task.visible ? task.repaint!(task, actr) : nothing
+    task.visible ? repaint!(task, actr) : nothing
     return nothing 
 end
 
@@ -331,6 +351,8 @@ end
     encoding!(actr, chunk, args...; kwargs...)
 
 Sets imaginal module as busy and registers a new event to create a new `chunk`
+
+# Arguments 
 
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
@@ -350,6 +372,8 @@ end
 Completes the creation of a chunk and adds resulting `chunk` to the imaginal buffer. The buffer
 states are set to busy = false and empty = false.
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `chunk`: a memory chunk 
 """
@@ -365,6 +389,8 @@ end
 
 Sets the declarative memory module as busy and Submits a request for a chunk and registers 
 a new event for the retrieval
+
+# Arguments 
 
 - `actr`: an ACT-R model object 
 - `request...`: a variable list of slot-value pairs
@@ -386,6 +412,8 @@ end
 Completes a memory retrieval by adding chunk to declarative memory buffer and setting
 busy = false and empty = false. Error is set to true if retrieval failure occurs.
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `request...`: a variable list of slot-value pairs
 """
@@ -406,6 +434,8 @@ end
 Sets the declarative motor module as busy and registers a new event for executing
 a key stroke
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `task`: a task that is a subtype of `AbstractTask`
 - `key`: a string representing a response key
@@ -424,7 +454,9 @@ end
     respond!(actr, task, key, args...; kwargs...)
 
 Executes a motor response with user defined `press_key!` function and sets module state to
-busy = false. 
+busy = false.
+
+# Arguments 
 
 - `actr`: an ACT-R model object 
 - `task`: a task that is a subtype of `AbstractTask`
@@ -432,7 +464,7 @@ busy = false.
 """
 function respond!(actr, task, key)
     actr.motor.state.busy = false
-    task.press_key!(task, actr, key)
+    press_key!(task, actr, key)
 end
 
 function clear_buffer!(actr, imaginal::Imaginal)
@@ -447,6 +479,8 @@ end
     clear_buffer!(mod::Mod)
 
 Removes chunk from buffer and sets buffer state to
+
+# Arguments 
 
 - `empty`: true 
 - `busy`: false
@@ -467,6 +501,8 @@ remove_chunk!(mod::Mod) = empty!(mod.buffer)
 
 Add chunk to buffer. 
 
+# Arguments 
+
 - `mod`: a module
 - `chunk`: a memory chunk 
 """
@@ -480,6 +516,8 @@ end
 
 Adds a visual object to the visicon. If `stuff` is set to true, the visual object
 is added to the visual location buffer. 
+
+# Arguments 
 
 - `actr`: an ACT-R model object
 - `vo`: visual object 
@@ -510,6 +548,8 @@ clear_visicon!(actr::AbstractACTR) = clear_visicon!(actr.visicon)
 
 Removes object from visicon. 
 
+# Arguments 
+
 - `actr`: an ACT-R model object 
 - `vo`: a visual object 
 """
@@ -519,6 +559,8 @@ remove_visual_object!(actr::AbstractACTR, vo) = remove_visual_object!(actr.visua
     remove_visual_object!(visicon, vo)
 
 Removes object from visicon. 
+
+# Arguments 
 
 - `visicon`: a vector of visual objects
 - `vo`: a visual object 
@@ -530,6 +572,8 @@ end
 """
     vo_to_chunk(vo=VisualObject())
 
+# Arguments 
+
 Converts visible object to a chunk with color and text slots.
 """
 function vo_to_chunk(vo=VisualObject())
@@ -540,6 +584,8 @@ end
     vo_to_chunk(actr, vo)
 
 Converts visible object to a chunk with color and text slots, and sets time created to current time.
+
+# Arguments 
 
 - `actr`: an ACT-R model object
 - `vo`: visual object
@@ -561,16 +607,31 @@ end
 Checks whether all conditions of a production rule are satisfied. 
 
 - `actr`: an ACT-R model object
-- `conditions`: a collection of functions representing production rule conditions.
+- `conditions...`: a collection of functions representing production rule conditions.
 """
-function all_match(actr, conditions)
+function all_match(actr, conditions...)    
     for c in conditions
         !c(actr) ? (return false) : nothing
     end
-    return true 
+    return true
 end
 
 function import_gui()
     path = pathof(ACTRSimulators) |> dirname |> x->joinpath(x, "")
     include(path * "GUI.jl")
+end
+
+function press_key!(task, actr, key)
+    @error "A method must be defined for press_key! in the form of 
+    press_key!(task, actr, key)"
+end
+
+function repaint!(task, actr)
+    @error "A method must be defined for repaint! in the form of 
+    repaint!(task, actr)" 
+end
+
+function start!(task, actr)
+    @error "A method must be defined for start! in the form of 
+    start!(task, actr)" 
 end

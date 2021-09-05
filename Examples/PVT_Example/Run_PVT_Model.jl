@@ -5,6 +5,7 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
 using Revise, ACTRSimulators
+import ACTRSimulators: start!, press_key!, repaint!
 import_gui()
 include("PVT.jl")
 include("PVT_Model.jl")

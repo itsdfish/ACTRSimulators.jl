@@ -32,9 +32,6 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     speed::Float64
     Δθ::Float64
     λθ::Float64
-    press_key!
-    start!
-    repaint!
 end
 
 function Tracking(;
@@ -49,9 +46,6 @@ function Tracking(;
     visible = false, 
     realtime = false,
     speed = 1.0,
-    press_key = press_key!,
-    start! = start!,
-    repaint! = repaint!,
     λθ = .01,
     revs_per_sec = 10,
     Δθ = (2 * π) * λθ * (1 / revs_per_sec)
@@ -71,10 +65,7 @@ function Tracking(;
         realtime, 
         speed, 
         Δθ,
-        λθ,
-        press_key!, 
-        start!,
-        repaint!
+        λθ
     )
 end
 
@@ -158,7 +149,7 @@ function present_stimulus(task, actr, dot)
     vo = VisualObject(;x = dot.x, y = dot.y)
     add_to_visicon!(actr, vo; stuff=true)
     push!(task.screen, vo)
-    task.visible ? task.repaint!(task, actr) : nothing
+    task.visible ? repaint!(task, actr) : nothing
 end
 
 function run_trial!(task, actr)

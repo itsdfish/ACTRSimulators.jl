@@ -1,11 +1,9 @@
-mutable struct SimpleTask{T,F1,F2} <: AbstractTask 
+mutable struct SimpleTask{T} <: AbstractTask 
     scheduler::T
     visible::Bool
     realtime::Bool
     speed::Float64
     screen::Vector{VisualObject}
-    press_key!::F1
-    start!::F2
 end
 
 function SimpleTask(;
@@ -14,10 +12,8 @@ function SimpleTask(;
     realtime=false, 
     speed=1.0,
     screen=Vector{VisualObject}(),
-    press_key! = press_key!,
-    start! = start!
     )
-    SimpleTask(scheduler, visible, realtime, speed, screen, press_key!, start!)
+    SimpleTask(scheduler, visible, realtime, speed, screen)
 end
 
 function start!(task::SimpleTask, model)
@@ -33,6 +29,6 @@ function present_stimulus(task, model)
     push!(task.screen, vo)
 end
 
-function press_key!(task, actr, key)
+function press_key!(task::SimpleTask, actr, key)
     empty!(task.screen)
 end

@@ -5,6 +5,7 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
 using Revise, ACTRSimulators, ConcreteStructs
+import ACTRSimulators: start!, repaint!
 import_gui()
 include("tracking_task.jl")
 include("tracking_model.jl")
@@ -22,10 +23,8 @@ motor = Motor()
 actr = ACTR(;scheduler, procedural, visual_location, visual, motor, visicon)
 rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
 push!(procedural.rules, rule1)
-rule2 = Rule(;conditions=can_respond, action=respond_action, actr, task, name="Respond")
-push!(procedural.rules, rule2)
 
-rule3 = Rule(;conditions=can_find, action=find_action, actr, task, name="Find")
-push!(procedural.rules, rule3)
+rule2 = Rule(;conditions=can_find, action=find_action, actr, task, name="Find")
+push!(procedural.rules, rule2)
 
 run!(actr, task, 30.0)

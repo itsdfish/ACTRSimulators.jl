@@ -21,7 +21,7 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     screen=Vector{VisualObject}(), window=nothing, canvas=nothing, visible=false, speed=1.0)
 ````
 """
-mutable struct PVT{T,W,C,F1,F2,F3} <: AbstractTask 
+mutable struct PVT{T,W,C} <: AbstractTask 
     n_trials::Int
     trial::Int 
     lb::Float64
@@ -35,9 +35,6 @@ mutable struct PVT{T,W,C,F1,F2,F3} <: AbstractTask
     visible::Bool
     realtime::Bool
     speed::Float64
-    press_key!::F1
-    start!::F2
-    repaint!::F3
 end
 
 function PVT(;
@@ -54,14 +51,11 @@ function PVT(;
     visible=false, 
     realtime=false,
     speed=1.0,
-    press_key=press_key!,
-    start! =start!,
-    repaint! =repaint!
     )
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return PVT(n_trials, trial, lb, ub, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed, press_key!, start!, repaint!)
+        realtime, speed)
 end
 
 function start!(task::PVT, actr)
@@ -98,6 +92,7 @@ function press_key!(task::PVT, actr, key)
             stop!(task.scheduler)
         end
     end
+    return nothing
 end
 
 function repaint!(task::PVT, actr)

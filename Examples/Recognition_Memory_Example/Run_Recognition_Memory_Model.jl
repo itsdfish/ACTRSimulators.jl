@@ -5,6 +5,7 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
 using Revise, ConcreteStructs, ACTRSimulators, DataFrames, FreqTables
+import ACTRSimulators: start!, press_key!
 import_gui()
 include("Recognition_Memory_Task.jl")
 include("Recognition_Memory_Model.jl")

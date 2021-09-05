@@ -4,7 +4,7 @@
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 
 function can_encode(actr)
@@ -13,32 +13,32 @@ function can_encode(actr)
     c3(actr) = actr.imaginal.state.empty
     c4(actr) = actr.visual.buffer[1].slots.text != "start test"
     c5(actr) = actr.goal.buffer[1].slots.goal != :test
-    return all_match(actr, (c1,c2,c3,c4,c5))
+    return all_match(actr, c1, c2, c3, c4, c5)
 end
 
 function can_start(actr)
     c1(actr) = !actr.visual.state.empty
     c2(actr) = actr.visual.buffer[1].slots.text == "start test"
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 
 function can_retrieve(actr)
     c1(actr) = !actr.declarative.state.busy
     c2(actr) = !actr.visual.state.empty
     c3(actr) = actr.goal.buffer[1].slots.goal == :test
-    return all_match(actr, (c1,c2,c3))
+    return all_match(actr, c1, c2, c3)
 end
 
 function can_respond_yes(actr)
     c1(actr) = !actr.declarative.state.empty
     c2(actr) = !actr.motor.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 
 function can_respond_no(actr)
     c1(actr) = actr.declarative.state.error
     c2(actr) = !actr.motor.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 ###################################################################################################
 #                                        Production Actions

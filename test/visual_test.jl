@@ -1,5 +1,5 @@
-import ACTRSimulators: start!
 using ACTRSimulators, Test, ACTRModels, Random
+import ACTRSimulators: start!, press_key!
 Random.seed!(8985)
 include("task.jl")
 
@@ -12,19 +12,18 @@ declarative = Declarative(;memory)
 visicon = VisualObject[]
 visual_location = VisualLocation(buffer=T[])
 visual = Visual(buffer=T[])
-motor = Motor()
 
-actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative, visicon)
+actr = ACTR(;scheduler, procedural, visual_location, visual, declarative, visicon)
 
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end    
 
 function can_stop(actr)
     c1(actr) = !actr.visual.state.empty
-    return all_match(actr, (c1,))
+    return all_match(actr, c1)
 end
 
 function attend_action(actr, task)

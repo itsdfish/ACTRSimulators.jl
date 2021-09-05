@@ -12,6 +12,7 @@ After installing `ACTRSimulators.jl`, the first step is to load the following de
 
 ```julia
 using ACTRSimulators
+import ACTRSimulators: start!, press_key!, repaint!
 include("PVT.jl")
 include("PVT_Model.jl")
 import_gui()
@@ -64,7 +65,7 @@ function can_wait(actr)
     c2(actr) = isempty(actr.visual.buffer)
     c3(actr) = !actr.visual.state.busy
     c4(actr) = !actr.motor.state.busy
-    return all_match(actr, (c1,c2,c3,c4))
+    return all_match(actr, c1, c2, c3, c4)
 end
 ```
 
@@ -76,7 +77,7 @@ Upon stimulus presentation, a visual object is "stuffed" into the `visual_locati
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 ```
 ### Respond
@@ -87,7 +88,7 @@ Once the model attends to the stimulus, it can execute a response. The `respond`
 function can_respond(actr)
     c1(actr) = !isempty(actr.visual.buffer)
     c2(actr) = !actr.motor.state.busy
-    return all_match(actr, (c1,c2))
+    return all_match(actr, c1, c2)
 end
 ```
 

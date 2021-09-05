@@ -35,8 +35,6 @@ Task(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, schedule
     visible::Bool
     realtime::Bool
     speed::Float64
-    press_key!
-    start!
     study_words
     test_words
     data
@@ -58,8 +56,6 @@ function Task(;
     visible = false, 
     realtime = false,
     speed = 1.0,
-    press_key = press_key!,
-    start! = start!,
     study_words = String[],
     test_words = String[],
     data = nothing,
@@ -69,7 +65,7 @@ function Task(;
     visible ? ((canvas,window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return Task(study_trial, test_trial, n_blocks, block, width, height, scheduler, screen, canvas, window, visible,
-        realtime, speed, press_key!, start!, study_words, test_words, data, test_phase, test_word)
+        realtime, speed, study_words, test_words, data, test_phase, test_word)
 end
 
 function draw_object!(task, word)
