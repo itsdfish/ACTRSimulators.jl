@@ -66,18 +66,19 @@ function sample_isi(task)
     return rand(Uniform(task.lb, task.ub))
 end
 
-function present_stimulus(task, actr)
+function present_stimulus(task, models)
     vo = VisualObject()
-    add_to_visicon!(actr, vo; stuff=true)
+    add_to_visicon!(models, vo; stuff=true)
     push!(task.screen, vo)
     w = task.width / 2
     task.visible ? draw_object!(task, "X", w, w) : nothing
+    return nothing
 end
 
-function run_trial!(task, actr)
+function run_trial!(task, models)
     isi = sample_isi(task)
     description = "present stimulus"
-    register!(task, present_stimulus, after, isi, task, actr;
+    register!(task, present_stimulus, after, isi, task, models;
         description)
 end
 

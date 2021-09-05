@@ -11,3 +11,5 @@ using SafeTestsets
 @safetestset "Motor" begin include("motor_test.jl") end
 
 @safetestset "Parallel" begin include("parallel_test.jl") end
+
+@safetestset "Two Models" begin include("two_models.jl") end

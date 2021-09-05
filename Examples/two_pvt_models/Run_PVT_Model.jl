@@ -7,12 +7,13 @@ Pkg.activate("../..")
 using Revise, ACTRSimulators
 import ACTRSimulators: start!, press_key!, repaint!
 import_gui()
-include("PVT.jl")
-include("PVT_Model.jl")
+include("../PVT_Example/PVT.jl")
+include("../PVT_Example/PVT_Model.jl")
 ###################################################################################################
 #                                        Run Model
 ###################################################################################################
 scheduler = ACTRScheduler(;model_trace=true)
 task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
-model = init_model(scheduler, task, 1)
-run!(model, task)
+n_models = 2
+models = map(id -> init_model(scheduler, task, id), 1:n_models)
+run!(models, task)

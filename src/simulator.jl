@@ -120,6 +120,8 @@ function ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, 
     return ACTRScheduler(events, time, running, model_trace, task_trace, store, Vector{event}())
 end
 
+run!(actr::AbstractACTR, task::AbstractTask, until=Inf) = run!([actr], task, until)
+
 """
     run!(actr, task::AbstractTask, until=Inf)
 
@@ -127,18 +129,18 @@ Simulate an ACT-R model
 
 # Arguments 
 
-- `actr`: an ACT-R model object 
+- `models`: a dictionary of ACT-R model objects
 - `task`: a task that is a subtype of `AbstractTask`
 - `until`: a specified termination time unless terminated sooner manually. Default is Inf
 """
-function run!(actr, task::AbstractTask, until=Inf)
+function run!(models, task::AbstractTask, until=Inf)
     s = task.scheduler
     last_event!(s, until)
-    start!(task, actr)
-    start!(actr)
-    fire!(actr)
+    start!(task, models)
+    start!(models)
+    fire!(models)
     while is_running(s, until)
-        next_event!(s, actr, task)
+        next_event!(s, models, task)
     end
     s.task_trace && !s.running ? print_event(s.time, "", "Stopped") : nothing
     return nothing
@@ -157,12 +159,12 @@ Dequeue and process a single event.
 - `actr`: an ACT-R model object 
 - `task`: a task that is a subtype of `AbstractTask`
 """
-function next_event!(s, actr, task)
+function next_event!(s, models, task)
     event = dequeue!(s.events)
     pause(task, event)
     s.time = event.time
     event.fun()
-    fire!(actr)
+    fire!(models)
     s.store ? push!(s.complete_events, event) : nothing
     s.model_trace && event.type == "model" ? print_event(event) : nothing
     s.task_trace && event.type !== "model" ? print_event(event) : nothing
@@ -197,7 +199,15 @@ A function that initializes the simulation for the model.
 - `actr`: an ACT-R model object 
 """
 function start!(actr::AbstractACTR)
-    register!(actr, ()->(), now; description="Starting")
+    register!(actr, ()->(), now; description="Starting", id=get_name(actr))
+    return nothing
+end
+
+function start!(models)
+    for model in values(models)
+        start!(model)
+    end
+    return nothing 
 end
 
 """
@@ -209,17 +219,25 @@ Selects a production rule and registers conflict resolution and new events for s
 
 - `actr`: an ACT-R model object 
 """
-function fire!(actr)
+function fire!(actr::AbstractACTR)
     actr.procedural.state.busy ? (return nothing) : nothing
     rules = actr.parms.select_rule(actr)
     isempty(rules) ? (return nothing) : nothing
     rule = rules[1]
     description = "Selected "*rule.name
     type = "model"
+    id = get_name(actr)
     tΔ = rnd_time(.05)
     resolving(actr, true)
     f(r, a, v) = (resolving(a, v), r.action()) 
-    register!(actr, f, after, tΔ, rule, actr, false; description, type)
+    register!(actr, f, after, tΔ, rule, actr, false; description, type, id)
+    return nothing 
+end
+
+function fire!(models)
+    for model in values(models)
+        fire!(model)
+    end
     return nothing 
 end
 
@@ -305,16 +323,18 @@ function attending!(actr, chunk)
     actr.visual.state.busy = true
     description = "Attend"
     type = "model"
+    id = get_name(actr)
     tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk; description, type)
+    register!(actr, attend!, after, tΔ , actr, chunk; id, description, type)
 end
 
 function attending!(actr, chunk, task)
     actr.visual.state.busy = true
     description = "Attend"
     type = "model"
+    id = get_name(actr)
     tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk, task; description, type)
+    register!(actr, attend!, after, tΔ , actr, chunk, task; id, description, type)
 end
 
 """
@@ -361,8 +381,9 @@ function encoding!(actr, chunk)
     actr.imaginal.state.busy = true
     description = "Create New Chunk"
     type = "model"
+    id = get_name(actr)
     tΔ = rnd_time(.200)
-    register!(actr, encode!, after, tΔ , actr, chunk; description, type)
+    register!(actr, encode!, after, tΔ , actr, chunk; id, description, type)
     return tΔ
 end
 
@@ -399,10 +420,11 @@ function retrieving!(actr; request...)
     actr.declarative.state.busy = true
     description = "Retrieve"
     type = "model"
+    id = get_name(actr)
     cur_time = get_time(actr)
     chunk = retrieve(actr, cur_time; request...)
     tΔ = compute_RT(actr, chunk)
-    register!(actr, retrieve!, after, tΔ , actr, chunk; description, type)
+    register!(actr, retrieve!, after, tΔ , actr, chunk; id, description, type)
     return tΔ
 end
 
@@ -444,9 +466,10 @@ function responding!(actr, task, key, args...; kwargs...)
     actr.motor.state.busy = true
     description = "Respond"
     type = "model"
+    id = get_name(actr)
     tΔ = rnd_time(.060)
     register!(actr, respond!, after, tΔ , actr, task, key;
-        description, type)
+        id, description, type)
     return tΔ
 end
 
@@ -523,11 +546,18 @@ is added to the visual location buffer.
 - `vo`: visual object 
 - `stuff`: buffer stuffing if true 
 """
-function add_to_visicon!(actr, vo; stuff=false) 
+function add_to_visicon!(actr::AbstractACTR, vo; stuff=false) 
     push!(actr.visicon, deepcopy(vo))
     if stuff 
        chunk = vo_to_chunk(actr, vo)
        add_to_buffer!(actr.visual_location, chunk)
+    end
+    return nothing 
+end
+
+function add_to_visicon!(models, vo; stuff=false) 
+    for model in models 
+        add_to_visicon!(model, vo; stuff)
     end
     return nothing 
 end
