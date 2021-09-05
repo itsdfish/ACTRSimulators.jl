@@ -12,8 +12,8 @@ include("../PVT_Example/PVT_Model.jl")
 ###################################################################################################
 #                                        Run Model
 ###################################################################################################
-scheduler = ACTRScheduler(;model_trace=true)
-task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
-n_models = 2
+scheduler = ACTRScheduler(;model_trace=false)
+task = PVT(;scheduler, n_trials=1000, visible=false, realtime=false)
+n_models = 10
 models = map(id -> init_model(scheduler, task, id), 1:n_models)
-run!(models, task)
+@time run!(models, task)
