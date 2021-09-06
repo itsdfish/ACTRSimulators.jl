@@ -1,6 +1,6 @@
 module ACTRSimulators
     using Reexport
-    @reexport using DiscreteEventsLite, ACTRModels
+    @reexport using DiscreteEventsLite, ACTRModels, CodeTracking
     using ACTRModels, DiscreteEventsLite, DataStructures
     import DiscreteEventsLite: run!, last_event!, is_running, print_event, register!
     import DiscreteEventsLite: Now, At, After, Every, AbstractScheduler
@@ -9,7 +9,7 @@ module ACTRSimulators
     export attend!, retrieving!, retrieve!, responding!, respond!
     export encoding!, encode!, all_match, AbstractTask, ACTRScheduler, clear!, setup_window, import_gui
     export draw_object!, draw_attention!, remove_visual_object!, clear_visicon!, move_vo!
-    export repaint!
+    export repaint!, why_not
     
     include("simulator.jl")
 end

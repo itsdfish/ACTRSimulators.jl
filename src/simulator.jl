@@ -631,21 +631,6 @@ function move_vo!(actr, x, y)
     vo.y = y
 end
 
-"""
-    all_match(actr, conditions) 
-
-Checks whether all conditions of a production rule are satisfied. 
-
-- `actr`: an ACT-R model object
-- `conditions...`: a collection of functions representing production rule conditions.
-"""
-function all_match(actr, conditions...)    
-    for c in conditions
-        !c(actr) ? (return false) : nothing
-    end
-    return true
-end
-
 function import_gui()
     path = pathof(ACTRSimulators) |> dirname |> x->joinpath(x, "")
     include(path * "GUI.jl")
@@ -664,4 +649,19 @@ end
 function start!(task, actr)
     @error "A method must be defined for start! in the form of 
     start!(task, actr)" 
+end
+
+function why_not(actr, rule)
+    str = rule.name * "\n"
+    for c in rule.conditions
+         str *= @code_string c(actr) 
+         str *= string(" ", c(actr))
+         str *= "\n"
+    end
+    println(str)
+    return nothing
+end
+
+function why_not(actr)
+    return why_not.(actr, get_rules(actr))
 end
