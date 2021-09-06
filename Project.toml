@@ -19,6 +19,7 @@ SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 [compat]
 ACTRModels = "v0.9.0"
 Cairo = "v1.0.0"
+CodeTracking = "1"
 ConcreteStructs = "v0.2.0"
 DataFrames = "1"
 DataStructures = "v0.18.0"
