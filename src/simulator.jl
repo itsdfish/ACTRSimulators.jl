@@ -652,9 +652,16 @@ function start!(task, actr)
 end
 
 function why_not(actr, rule)
-    str = rule.name * "/r"
+    str = rule.name * "\n"
     for c in rule.conditions
-         str *= @code_string c(actr)
+         str *= @code_string c(actr) 
+         str *= string(" ", c(actr))
+         str *= "\n"
     end
-    return str
+    println(str)
+    return nothing
+end
+
+function why_not(actr)
+    return why_not.(actr, get_rules(actr))
 end

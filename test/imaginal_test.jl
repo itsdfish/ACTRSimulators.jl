@@ -18,18 +18,18 @@ actr = ACTR(;scheduler, visicon, procedural, visual_location, visual, motor, dec
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
-    return all_match(actr, c1, c2)
+    return c1, c2
 end  
 
 function can_encode(actr)
     c1(actr) = !isempty(actr.visual.buffer)
     c2(actr) = !actr.imaginal.state.busy
-    return all_match(actr, c1, c2)
+    return c1, c2
 end    
 
 function can_stop(actr)
     c1(actr) = !actr.imaginal.state.empty
-    return all_match(actr, c1)
+    return (c1,)
 end
 
 function attend_action(actr, task)

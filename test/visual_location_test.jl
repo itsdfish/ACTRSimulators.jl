@@ -17,7 +17,7 @@ actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative,
 
 function can_stop(actr)
     c1(actr) = !actr.visual_location.state.empty
-    return all_match(actr, c1)
+    return (c1,)
 end
 
 function stop(actr, task)

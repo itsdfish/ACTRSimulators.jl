@@ -17,12 +17,12 @@ actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative,
 
 function can_retrieve(actr)
     c1(actr) = !actr.declarative.state.busy
-    return all_match(actr, c1)
+    return (c1,)
 end
 
 function can_stop(actr)
     c1(actr) = !actr.declarative.state.empty
-    return all_match(actr, c1)
+    return (c1,)
 end
 
 function retrieve_chunk(actr, task)
