@@ -14,5 +14,5 @@ include("PVT_Model.jl")
 ###################################################################################################
 scheduler = ACTRScheduler(;model_trace=true)
 task = PVT(;scheduler, n_trials=2, visible=true, realtime=true)
-model = init_model(scheduler, task, 1)
+model = init_model(scheduler, task)
 run!(model, task)

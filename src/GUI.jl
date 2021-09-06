@@ -7,6 +7,10 @@
     clear!(task)   
 
 Clears all stimuli from window. 
+
+# Arguments
+
+- `task`: a task object <: AbstractTask
 """
 function clear!(task)
     c = task.canvas
@@ -27,6 +31,12 @@ setup_window(width::Float64, name="") = setup_window(width, width, name)
     setup_window(width::Float64, height::Float64, name="")
 
 Generate a blank window.
+
+# Arguments
+
+- `width`: width of window 
+- `height`: height of window
+- `name=""`: name of window to appear on upper tab
 """
 function setup_window(width::Float64, height::Float64, name="")
     canvas = @GtkCanvas()
@@ -41,11 +51,32 @@ function setup_window(width::Float64, height::Float64, name="")
     return canvas,window
 end
 
+"""
+    draw_attention!(task, actr) 
+
+Draws a yellow circle to represent visual attention
+
+# Arguments
+
+- `task`: a task object <: AbstractTask
+- `model`: an ACT-R model object
+"""
 function draw_attention!(task, actr) 
     focus = actr.visual.focus
     draw_attention!(task, focus...)
 end
 
+"""
+    draw_attention!(task, actr) 
+
+Draws a yellow circle to represent visual attention
+
+# Arguments
+
+- `task`: a task object <: AbstractTask
+- `x`: x coordinate of visual attention
+- `y`: y coordinate of visual attention
+"""
 function draw_attention!(task, x, y)
     c = task.canvas
     @guarded draw(c) do widget
@@ -58,6 +89,19 @@ function draw_attention!(task, x, y)
     return nothing
 end
 
+"""
+    draw_object!(task, object, x, y) 
+
+Draws an object in the window specified at `task.canvas`. The 
+coordinates of the object are the upper left point of the object
+
+# Arguments
+
+- `task`: a task object <: AbstractTask
+- `object`: object to be drawn
+- `x`: x coordinate of visual attention
+- `y`: y coordinate of visual attention
+"""
 function draw_object!(task, object, x, y)
     c = task.canvas
     @guarded draw(c) do widget

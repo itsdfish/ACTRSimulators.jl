@@ -9,14 +9,6 @@ function can_wait(actr)
     return c1, c2, c3, c4
 end
 
-function can_wait1(actr)
-    c1(actr) = isempty(actr.visual_location.buffer)
-    c2(actr) = isempty(actr.visual.buffer)
-    c3(actr) = !actr.visual.state.busy
-    c4(actr) = !actr.motor.state.busy
-    return c1, c2, c3, c4
-end
-
 function can_attend(actr)
     c1(actr) = !isempty(actr.visual_location.buffer)
     c2(actr) = !actr.visual.state.busy
@@ -51,8 +43,10 @@ function respond_action(actr, task)
     responding!(actr, task, key)
     return nothing
 end
-
-function init_model(scheduler, task, id)
+###################################################################################################
+#                                        Utilities
+###################################################################################################
+function init_model(scheduler, task, id=1)
     name = string("model", id)
     procedural = Procedural()
     T = vo_to_chunk() |> typeof

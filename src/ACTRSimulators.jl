@@ -12,4 +12,11 @@ module ACTRSimulators
     export repaint!, why_not
     
     include("simulator.jl")
+    include("buffers.jl")
+    include("declarative.jl")
+    include("imaginal.jl")
+    include("visual.jl")
+    include("motor.jl")
+    include("procedural.jl")
+    include("utilities.jl")
 end
