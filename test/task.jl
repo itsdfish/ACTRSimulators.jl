@@ -1,9 +1,10 @@
-mutable struct SimpleTask{T} <: AbstractTask 
+mutable struct SimpleTask{T,T1} <: AbstractTask 
     scheduler::T
     visible::Bool
     realtime::Bool
     speed::Float64
     screen::Vector{VisualObject}
+    data::T1
 end
 
 function SimpleTask(;
@@ -13,7 +14,7 @@ function SimpleTask(;
     speed=1.0,
     screen=Vector{VisualObject}(),
     )
-    SimpleTask(scheduler, visible, realtime, speed, screen)
+    SimpleTask(scheduler, visible, realtime, speed, screen, DataFrame())
 end
 
 function start!(task::SimpleTask, model)
@@ -31,4 +32,5 @@ end
 
 function press_key!(task::SimpleTask, actr, key)
     empty!(task.screen)
+    push!(task.data, (key=key,))
 end

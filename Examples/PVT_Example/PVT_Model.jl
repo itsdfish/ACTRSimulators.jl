@@ -2,21 +2,21 @@
 #                                        Production Conditions
 ###################################################################################################
 function can_wait(actr)
-    c1(actr) = isempty(actr.visual_location.buffer)
-    c2(actr) = isempty(actr.visual.buffer)
+    c1(actr) = actr.visual_location.state.empty
+    c2(actr) = actr.visual.state.empty
     c3(actr) = !actr.visual.state.busy
     c4(actr) = !actr.motor.state.busy
     return c1, c2, c3, c4
 end
 
 function can_attend(actr)
-    c1(actr) = !isempty(actr.visual_location.buffer)
+    c1(actr) = !actr.visual_location.state.empty
     c2(actr) = !actr.visual.state.busy
     return c1, c2
 end
 
 function can_respond(actr)
-    c1(actr) = !isempty(actr.visual.buffer)
+    c1(actr) = !actr.visual.state.empty
     c2(actr) = !actr.motor.state.busy
     return c1, c2
 end
@@ -46,7 +46,7 @@ end
 ###################################################################################################
 #                                        Utilities
 ###################################################################################################
-function init_model(scheduler, task, id=1)
+function init_model(scheduler, task, id=1, parms=())
     name = string("model", id)
     procedural = Procedural()
     T = vo_to_chunk() |> typeof
@@ -54,7 +54,7 @@ function init_model(scheduler, task, id=1)
     visual = Visual(buffer=T[])
     visicon = VisualObject[]
     motor = Motor()
-    actr = ACTR(;name, scheduler, procedural, visual_location, visual, motor, visicon)
+    actr = ACTR(;name, scheduler, procedural, visual_location, visual, motor, visicon, parms...)
     rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
     push!(procedural.rules, rule1)
     rule2 = Rule(;conditions=can_wait, action=wait_action, actr, task, name="Wait")

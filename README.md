@@ -61,8 +61,8 @@ The model will wait if the `visual_location` and `visual` buffers are empty and 
 
 ```julia 
 function can_wait(actr)
-    c1(actr) = isempty(actr.visual_location.buffer)
-    c2(actr) = isempty(actr.visual.buffer)
+    c1(actr) = actr.visual_location.state.empty
+    c2(actr) = actr.visual.state.empty
     c3(actr) = !actr.visual.state.busy
     c4(actr) = !actr.motor.state.busy
     return c1, c2, c3, c4
@@ -75,7 +75,7 @@ Upon stimulus presentation, a visual object is "stuffed" into the `visual_locati
 
 ```julia 
 function can_attend(actr)
-    c1(actr) = !isempty(actr.visual_location.buffer)
+    c1(actr) = !actr.visual_location.state.empty
     c2(actr) = !actr.visual.state.busy
     return c1, c2
 end
@@ -86,7 +86,7 @@ Once the model attends to the stimulus, it can execute a response. The `respond`
 
 ```julia 
 function can_respond(actr)
-    c1(actr) = !isempty(actr.visual.buffer)
+    c1(actr) = !actr.visual.state.empty
     c2(actr) = !actr.motor.state.busy
     return c1, c2
 end

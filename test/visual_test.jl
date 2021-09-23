@@ -1,4 +1,4 @@
-using ACTRSimulators, Test, ACTRModels, Random
+using ACTRSimulators, Test, ACTRModels, Random, DataFrames
 import ACTRSimulators: start!, press_key!
 Random.seed!(8985)
 include("task.jl")

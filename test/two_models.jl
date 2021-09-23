@@ -1,11 +1,12 @@
-using ACTRSimulators, Test, ACTRModels, Random
+using ACTRSimulators, Test, ACTRModels, Random, DataFrames
 import ACTRSimulators: start!, press_key!
 Random.seed!(8985)
 include("task.jl")
 
 function can_retrieve(actr)
     c1(actr) = !actr.declarative.state.busy
-    return (c1,)
+    c2(actr) = actr.declarative.state.empty
+    return c1, c2
 end
 
 function can_stop(actr)

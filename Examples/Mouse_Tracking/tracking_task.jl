@@ -34,6 +34,8 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     λθ::Float64
 end
 
+Broadcast.broadcastable(x::Tracking) = Ref(x)
+
 function Tracking(;
     width = 600.0, 
     height = 600.0, 
@@ -112,20 +114,20 @@ function update_angle!(dot, Δθ)
     dot.θ = mod(dot.θ + Δθ, 2 * π)
 end
 
-function update_dot!(task, actr)
+function update_dot!(task)
     update_angle!(task.dot, task.Δθ)
     compute_position!(task.dot)
 end
 
-function update_vo!(actr, task)
+function update_vo!(models, task)
     x,y = get_position(task.dot)
-    move_vo!(actr, x, y)
+    move_vo!.(models, x, y)
 end
 
-function move_dot!(actr, task)
-    update_dot!(task, actr)
-    update_vo!(actr, task)
-    repaint!(task, actr)
+function move_dot!(models, task)
+    update_dot!(task)
+    update_vo!(models, task)
+    repaint!(task, models)
 end
 
 mutable struct Cursor
@@ -139,30 +141,30 @@ function draw_object!(task, dot::Dot)
     draw_object!(task, "O", dot.x, dot.y)
 end
 
-function start!(task::Tracking, actr)
+function start!(task::Tracking, models)
     x,y = compute_position(task.dot)
-    present_stimulus(task, actr, task.dot)
-    run_trial!(task, actr)
+    present_stimulus(task, models, task.dot)
+    run_trial!(task, models)
 end
 
-function present_stimulus(task, actr, dot)
+function present_stimulus(task, models, dot)
     vo = VisualObject(;x = dot.x, y = dot.y)
-    add_to_visicon!(actr, vo; stuff=true)
+    add_to_visicon!(models, vo; stuff=true)
     push!(task.screen, vo)
-    task.visible ? repaint!(task, actr) : nothing
+    task.visible ? repaint!(task, models) : nothing
 end
 
-function run_trial!(task, actr)
+function run_trial!(task, models)
     λ = task.λθ
-    register!(task, move_dot!, every, λ, actr, task)
+    register!(task, move_dot!, every, λ, models, task)
 end
 
 function press_key!(task::Tracking, actr, key)
     println("press_key not implimented")
 end
 
-function repaint!(task::Tracking, actr)
+function repaint!(task::Tracking, models)
     clear!(task)
     draw_object!(task, task.dot)
-    draw_attention!(task, actr) 
+    draw_attention!.(task, models) 
 end

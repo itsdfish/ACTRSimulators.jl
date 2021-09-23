@@ -5,8 +5,8 @@ cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
 using Revise, ACTRSimulators, ConcreteStructs
-import ACTRSimulators: start!, repaint!
 import_gui()
+import ACTRSimulators: start!, repaint!
 include("tracking_task.jl")
 include("tracking_model.jl")
 ###################################################################################################

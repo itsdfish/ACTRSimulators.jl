@@ -13,3 +13,5 @@ using SafeTestsets
 @safetestset "Parallel" begin include("parallel_test.jl") end
 
 @safetestset "Two Models" begin include("two_models.jl") end
+
+@safetestset "Utility Noise" begin include("utility_noise.jl") end

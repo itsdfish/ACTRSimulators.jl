@@ -58,8 +58,8 @@ function PVT(;
         realtime, speed)
 end
 
-function start!(task::PVT, actr)
-    run_trial!(task, actr)
+function start!(task::PVT, models)
+    run_trial!(task, models)
 end
 
 function sample_isi(task)
