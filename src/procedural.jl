@@ -8,28 +8,38 @@ Selects a production rule and registers conflict resolution and new events for s
 - `actr`: an ACT-R model object 
 """
 function fire!(actr::AbstractACTR)
+    # consider breaking this up into select and execute
     actr.procedural.state.busy ? (return nothing) : nothing
-    rules = select_rule(actr)
-    isempty(rules) ? (return nothing) : nothing
-    rule = rules[1]
-    description = "Selected "*rule.name
+    rules = get_rule_set(actr)
+    compute_utilities!(actr, rules)
+    rule,state = select_rule(actr, rules)
+    state == :no_matches ? (return nothing) : nothing
     type = "model"
     id = get_name(actr)
     tΔ = rnd_time(.05)
     resolving(actr, true)
+    if state == :microlapse 
+        g(a, v) = resolving(a, v)
+        description = "Microlapse " 
+        register!(actr, g, after, tΔ, actr, false; description, type, id)
+        return nothing 
+    end
     f(r, a, v) = (resolving(a, v), r.action()) 
-    register!(actr, f, after, tΔ, rule, actr, false; description, type, id)
+    description = "Selected " * rule[1].name
+    register!(actr, f, after, tΔ, rule[1], actr, false; description, type, id)
     return nothing 
 end
 
 resolving(actr, v) = actr.procedural.state.busy = v
 
-function select_rule(actr)
-    rules = get_rule_set(actr)
-    isempty(rules) ? (return rules) : nothing
-    compute_utilities!(actr, rules)
-    _,idx = findmax(x -> x.utility, rules)
-    return rules[idx:idx]
+function select_rule(actr, rules)
+    isempty(rules) ? (return rules,:no_matches) : nothing
+    max_utility,idx = findmax(x -> x.utility, rules)
+    if max_utility < actr.parms.τu
+        decrement_utility!(actr)
+        return rules,:microlapse
+    end
+    return rules[idx:idx],:match
 end
 
 function get_rule_set(actr)
@@ -41,7 +51,7 @@ function get_rule_set(actr)
         # rule is eligible for partial matching
         return rules 
     end 
-    return filter(r->match(actr, r), rules)
+    return filter(r -> match(actr, r), rules)
 end
 
 get_rules(actr) = actr.procedural.rules
@@ -78,7 +88,7 @@ function compute_utility!(actr, rule)
     @unpack utility_noise, mmp_utility = actr.parms
     mmp_utility ? compute_penalties!(actr, rule) : nothing
     utility_noise ? add_noise!(actr, rule) : nothing 
-    total_utility!(rule)
+    total_utility!(actr, rule)
 end
   
 function compute_penalties!(actr, rule)
@@ -113,8 +123,14 @@ function add_noise!(actr, rule)
     rule.utility_noise = rand(Normal(0, σu))
 end
 
-function total_utility!(r::Rule)
-    r.utility_mean = r.initial_utility + r.utility_penalty
+function decrement_utility!(actr)
+    actr.parms.utility_decrement *= actr.parms.u0Δ
+    return nothing
+end
+
+function total_utility!(actr, r::Rule)
+    (;u0,utility_decrement) = actr.parms
+    r.utility_mean = utility_decrement * (u0 + r.initial_utility + r.utility_penalty)
     r.utility = r.utility_mean + r.utility_noise
     return nothing 
 end
@@ -122,6 +138,7 @@ end
 function Rule(;
     utility = 0.0,
     initial_utility = 0.0,
+    utility_decrement = 1.0,
     utility_mean = 0.0,
     utility_penalty = 0.0,
     utility_noise = 0.0,
@@ -142,7 +159,7 @@ function Rule(;
         utility_penalty, 
         utility_noise, 
         conditions(actr, args...; kwargs...), 
-        ()->action(actr, task; kwargs...),
+        () -> action(actr, task; kwargs...),
         can_pm,
         name
      )

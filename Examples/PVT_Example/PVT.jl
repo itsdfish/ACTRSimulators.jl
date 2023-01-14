@@ -77,9 +77,22 @@ end
 
 function run_trial!(task, models)
     isi = sample_isi(task)
-    description = "present stimulus"
+    register!(task, reset_utilities, after, isi, task, models;
+    description = "Reset Utilities")
     register!(task, present_stimulus, after, isi, task, models;
-        description)
+        description = "Present Stimulus")
+end
+
+function reset_utilities(_, model::ACTR)
+    model.parms.utility_decrement = 1.0
+    return nothing
+end
+
+function reset_utilities(task, models)
+    for model ∈ models 
+        reset_utilities(task, model)
+    end
+    return nothing 
 end
 
 function press_key!(task::PVT, actr, key)

@@ -46,7 +46,7 @@ end
 ###################################################################################################
 #                                        Utilities
 ###################################################################################################
-function init_model(scheduler, task, id=1, parms=())
+function init_model(scheduler, task, id=1; parms...)
     name = string("model", id)
     procedural = Procedural()
     T = vo_to_chunk() |> typeof

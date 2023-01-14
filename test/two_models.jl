@@ -1,5 +1,6 @@
 using ACTRSimulators, Test, ACTRModels, Random, DataFrames
 import ACTRSimulators: start!, press_key!
+
 Random.seed!(8985)
 include("task.jl")
 
@@ -68,13 +69,13 @@ chunk = models[2].declarative.buffer[1]
 
 complete_events = scheduler.complete_events
 model1_events = filter(x->x.id == "model1", complete_events)
-observed = map(x->x.description, model1_events)
+observed = map(x -> x.description, model1_events)
 expected = [
     "Starting", 
     "Selected Retrieve", 
-    "Retrieve", 
-    "Selected Stop"
+    "Retrieve"
 ]
+# note that this depends on the rng
 @test expected == observed
 
 complete_events = scheduler.complete_events
@@ -84,5 +85,6 @@ expected = [
     "Starting", 
     "Selected Retrieve", 
     "Retrieve", 
+    "Selected Stop",
 ]
 @test expected == observed

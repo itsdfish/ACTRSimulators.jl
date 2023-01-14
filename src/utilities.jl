@@ -17,7 +17,7 @@ end
 function register!(actr::AbstractACTR, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
     scheduler = actr.scheduler
     function f(args...; kwargs...) 
-        fun1 = ()->fun(args...; kwargs...)
+        fun1 = () -> fun(args...; kwargs...)
         fun1()
         register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
     end
@@ -42,7 +42,7 @@ end
 function register!(task::AbstractTask, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
     scheduler = task.scheduler
     function f(args...; kwargs...) 
-        fun1 = ()->fun(args...; kwargs...)
+        fun1 = () -> fun(args...; kwargs...)
         fun1()
         register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
     end
