@@ -85,6 +85,7 @@ end
 
 function reset_utilities(_, model::ACTR)
     model.parms.utility_decrement = 1.0
+    model.parms.threshold_decrement = 1.0
     return nothing
 end
 

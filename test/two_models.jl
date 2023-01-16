@@ -68,7 +68,7 @@ chunk = models[2].declarative.buffer[1]
 @test chunk.slots == (animal=:dog,)
 
 complete_events = scheduler.complete_events
-model1_events = filter(x->x.id == "model1", complete_events)
+model1_events = filter(x -> x.id == "model1", complete_events)
 observed = map(x -> x.description, model1_events)
 expected = [
     "Starting", 
@@ -79,8 +79,8 @@ expected = [
 @test expected == observed
 
 complete_events = scheduler.complete_events
-model2_events = filter(x->x.id == "model2", complete_events)
-observed = map(x->x.description, model2_events)
+model2_events = filter(x -> x.id == "model2", complete_events)
+observed = map(x -> x.description, model2_events)
 expected = [
     "Starting", 
     "Selected Retrieve", 

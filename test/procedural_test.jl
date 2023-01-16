@@ -5,7 +5,7 @@
     Random.seed!(8985)
     include("task.jl")
     
-    parms = (u0=0.0,τu=1.0)
+    parms = (u0=0.5, τu=1.0, u0Δ=.90, τuΔ=.90)
     
     scheduler = ACTRScheduler(;model_trace=true, store=true)
     task = SimpleTask(;scheduler)
@@ -85,6 +85,9 @@
     rule,state = select_rule(actr, rules)
     
     @test state == :microlapse
+
+    @test actr.parms.utility_decrement == .90
+    @test actr.parms.threshold_decrement == .90
 end
 
 
@@ -176,6 +179,9 @@ end
     
     @test state == :match
     @test rule[1] == rule1
+
+    @test actr.parms.utility_decrement == 1.0
+    @test actr.parms.threshold_decrement == 1.0
 end
 
 @safetestset "no matching production rules" begin 
@@ -263,4 +269,7 @@ end
     
     @test state == :no_matches
     @test isempty(rule)
+
+    @test actr.parms.utility_decrement == 1.0
+    @test actr.parms.threshold_decrement == 1.0
 end

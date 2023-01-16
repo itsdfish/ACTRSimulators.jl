@@ -50,7 +50,7 @@ function register!(task::AbstractTask, fun, when::Every, t, args...; id="", type
 end
 
 function import_gui()
-    path = pathof(ACTRSimulators) |> dirname |> x->joinpath(x, "")
+    path = pathof(ACTRSimulators) |> dirname |> x -> joinpath(x, "")
     include(path * "GUI.jl")
 end
 

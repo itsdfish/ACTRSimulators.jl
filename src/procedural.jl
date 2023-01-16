@@ -11,6 +11,7 @@ function fire!(actr::AbstractACTR)
     # consider breaking this up into select and execute
     actr.procedural.state.busy ? (return nothing) : nothing
     rules = get_rule_set(actr)
+    compute_threshold!(actr)
     compute_utilities!(actr, rules)
     rule,state = select_rule(actr, rules)
     state == :no_matches ? (return nothing) : nothing
@@ -37,6 +38,7 @@ function select_rule(actr, rules)
     max_utility,idx = findmax(x -> x.utility, rules)
     if max_utility < actr.parms.τu
         decrement_utility!(actr)
+        decrement_threshold!(actr)
         return rules,:microlapse
     end
     return rules[idx:idx],:match
@@ -77,6 +79,12 @@ function all_match(actr, conditions)
     return true
 end
 
+function compute_threshold!(actr)
+    (;τu0,threshold_decrement) = actr.parms
+    actr.parms.τu = threshold_decrement * τu0
+    return actr.parms.τu
+end
+
 function compute_utilities!(actr, rules)
     for rule in rules
         compute_utility!(actr, rule)
@@ -105,6 +113,9 @@ function compute_penalties!(actr, rule)
 end
 
 function utility_match(actr::ACTR, condition)
+    # the issue here is that buffer conditions must be true 
+    # for example, the model cannot attend to a stimulus not in the visual buffer
+    # what is a good way to distinghish between buffer and chunk conditions? 
     @unpack model_trace = actr.scheduler
     penalty = condition(actr) ? 0.0 : 1.0
     model_trace ? condition_trace(actr, condition, penalty) : nothing
@@ -121,10 +132,16 @@ end
 function add_noise!(actr, rule)
     @unpack σu = actr.parms
     rule.utility_noise = rand(Normal(0, σu))
+    return nothing
 end
 
 function decrement_utility!(actr)
     actr.parms.utility_decrement *= actr.parms.u0Δ
+    return nothing
+end
+
+function decrement_threshold!(actr)
+    actr.parms.threshold_decrement *= actr.parms.τuΔ
     return nothing
 end
 
@@ -138,7 +155,6 @@ end
 function Rule(;
     utility = 0.0,
     initial_utility = 0.0,
-    utility_decrement = 1.0,
     utility_mean = 0.0,
     utility_penalty = 0.0,
     utility_noise = 0.0,

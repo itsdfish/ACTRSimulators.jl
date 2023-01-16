@@ -71,7 +71,7 @@ run!(actr, task)
 
 @test isempty(task.screen)
 
-observed = map(x->x.description, scheduler.complete_events)
+observed = map(x -> x.description, scheduler.complete_events)
 expected = [
     "Starting", 
     "Present Stimulus", 

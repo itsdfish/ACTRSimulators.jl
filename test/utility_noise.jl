@@ -98,7 +98,7 @@ push!(procedural.rules, rule3)
 rule4 = Rule(;conditions=can_respond2, action=motor_action2, actr, task, name="Respond f")
 push!(procedural.rules, rule4)
 
-map(_->run!(actr, task), 1:1000)
+map(_ -> run!(actr, task), 1:1000)
 
 p_j = mean(task.data.key .== "j")
 

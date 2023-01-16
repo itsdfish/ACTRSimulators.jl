@@ -30,7 +30,7 @@ run!(actr, task)
 chunk = actr.visual_location.buffer[1]
 @test chunk.slots == (color = :black, text = "hello", x = 300.0, y = 300.0)
 
-observed = map(x->x.description, scheduler.complete_events)
+observed = map(x -> x.description, scheduler.complete_events)
 expected = [
     "Starting", 
     "Present Stimulus",

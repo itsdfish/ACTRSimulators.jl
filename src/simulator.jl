@@ -199,6 +199,6 @@ A function that initializes the simulation for the model.
 - `actr`: an ACT-R model object 
 """
 function start!(actr::AbstractACTR)
-    register!(actr, ()->(), now; description="Starting", id=get_name(actr))
+    register!(actr, () -> (), now; description="Starting", id=get_name(actr))
     return nothing
 end

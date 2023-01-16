@@ -58,7 +58,7 @@ run!(actr, task)
 @test isempty(task.screen)
 @test !isempty(actr.imaginal.buffer)
 
-observed = map(x->x.description, scheduler.complete_events)
+observed = map(x -> x.description, scheduler.complete_events)
 expected = [
     "Starting", 
     "Present Stimulus", 
