@@ -27,7 +27,7 @@ DataStructures = "v0.18.0"
 DiscreteEventsLite = "v0.1.0"
 Gtk = "v1.1.0"
 Reexport = "1.0.0"
-SafeTestsets = "v0.0.1"
+SafeTestsets = "v0.0.1, 0.1"
 julia = "^1.0"
 
 [extras]
