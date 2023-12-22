@@ -1,10 +1,18 @@
 module ACTRSimulators
+
     using Reexport
     @reexport using DiscreteEventsLite, ACTRModels
-    using ACTRModels, DiscreteEventsLite, DataStructures, CodeTracking
+    using ACTRModels
+    using CodeTracking
+    using DataStructures
+    using DiscreteEventsLite
+    using Distributions: Normal
+
     import DiscreteEventsLite: run!, last_event!, is_running, print_event, register!
     import DiscreteEventsLite: Now, At, After, Every, AbstractScheduler
     import ACTRModels: AbstractACTR, utility_match
+
+
     export run!, next_event!, register!, vo_to_chunk, add_to_visicon!, clear_buffer!, add_to_buffer!, get_time, attending!
     export attend!, retrieving!, retrieve!, responding!, respond!
     export encoding!, encode!, all_match, AbstractTask, ACTRScheduler, setup_window, import_gui

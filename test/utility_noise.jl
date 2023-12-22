@@ -1,5 +1,7 @@
 using ACTRSimulators, Test, ACTRModels, DataFrames, Random
 import ACTRSimulators: start!, press_key!
+using Statistics
+
 Random.seed!(8985)
 include("task.jl")
 

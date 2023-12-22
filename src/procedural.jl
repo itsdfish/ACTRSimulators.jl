@@ -45,7 +45,7 @@ function select_rule(actr, rules)
 end
 
 function get_rule_set(actr)
-    @unpack mmp_utility = actr.parms
+    (;mmp_utility) = actr.parms
     rules = get_rules(actr)
     if mmp_utility
         # use @code_string to filter out conditions that do not contain
@@ -93,15 +93,15 @@ function compute_utilities!(actr, rules)
 end
 
 function compute_utility!(actr, rule)
-    @unpack utility_noise, mmp_utility = actr.parms
+    (;utility_noise, mmp_utility) = actr.parms
     mmp_utility ? compute_penalties!(actr, rule) : nothing
     utility_noise ? add_noise!(actr, rule) : nothing 
     total_utility!(actr, rule)
 end
   
 function compute_penalties!(actr, rule)
-    @unpack model_trace = actr.scheduler
-    @unpack δu,util_mmp_fun = actr.parms
+    (;model_trace) = actr.scheduler
+    (;δu,util_mmp_fun) = actr.parms
     model_trace ? println("rule: ", rule.name) : nothing
     penalty = 0.0
     for c in rule.conditions
@@ -116,7 +116,7 @@ function utility_match(actr::ACTR, condition)
     # the issue here is that buffer conditions must be true 
     # for example, the model cannot attend to a stimulus not in the visual buffer
     # what is a good way to distinghish between buffer and chunk conditions? 
-    @unpack model_trace = actr.scheduler
+    (;model_trace) = actr.scheduler
     penalty = condition(actr) ? 0.0 : 1.0
     model_trace ? condition_trace(actr, condition, penalty) : nothing
     return penalty
@@ -130,8 +130,7 @@ function condition_trace(actr, condition, penalty)
 end
 
 function add_noise!(actr, rule)
-    @unpack σu = actr.parms
-    rule.utility_noise = rand(Normal(0, σu))
+    rule.utility_noise = rand(Normal(0, actr.parms.σu))
     return nothing
 end
 
