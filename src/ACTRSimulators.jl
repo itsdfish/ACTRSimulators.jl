@@ -8,16 +8,49 @@ module ACTRSimulators
     using DiscreteEventsLite
     using Distributions: Normal
 
-    import DiscreteEventsLite: run!, last_event!, is_running, print_event, register!
-    import DiscreteEventsLite: Now, At, After, Every, AbstractScheduler
-    import ACTRModels: AbstractACTR, utility_match
+    import ACTRModels: AbstractACTR
+    import DiscreteEventsLite: run!
+    import DiscreteEventsLite: last_event!
+    import DiscreteEventsLite: is_running
+    import DiscreteEventsLite: print_event
+    import DiscreteEventsLite: register!
+    import DiscreteEventsLite: Now
+    import DiscreteEventsLite: At
+    import DiscreteEventsLite: After
+    import DiscreteEventsLite: Every
+    import DiscreteEventsLite: AbstractScheduler
+    import DiscreteEventsLite: utility_match
 
 
-    export run!, next_event!, register!, vo_to_chunk, add_to_visicon!, clear_buffer!, add_to_buffer!, get_time, attending!
-    export attend!, retrieving!, retrieve!, responding!, respond!
-    export encoding!, encode!, all_match, AbstractTask, ACTRScheduler, setup_window, import_gui
-    export remove_visual_object!, clear_visicon!, move_vo!
-    export repaint!, draw_object!, clear!, draw_attention!, why_not
+    export run!
+    export next_event!
+    export  register!
+    export  vo_to_chunk
+    export  add_to_visicon!
+    export  clear_buffer!
+    export  add_to_buffer!
+    export  get_time
+    export  attending!
+    export attend!
+    export retrieving!
+    export retrieve!
+    export responding!
+    export respond!
+    export encoding!
+    export encode!
+    export all_match
+    export AbstractTask
+    export ACTRScheduler
+    export setup_window
+    export import_gui
+    export remove_visual_object!
+    export clear_visicon!
+    export move_vo!
+    export repaint!
+    export draw_object
+    export clear!
+    export draw_attention!
+    export why_not
     
     include("simulator.jl")
     include("buffers.jl")
