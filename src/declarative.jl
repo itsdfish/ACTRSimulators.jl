@@ -17,7 +17,7 @@ function retrieving!(actr; request...)
     cur_time = get_time(actr)
     chunk = retrieve(actr, cur_time; request...)
     tΔ = compute_RT(actr, chunk)
-    register!(actr, retrieve!, after, tΔ , actr, chunk; id, description, type)
+    register!(actr, retrieve!, after, tΔ, actr, chunk; id, description, type)
     return tΔ
 end
 
@@ -40,5 +40,5 @@ function retrieve!(actr, chunk)
         actr.declarative.state.empty = false
         add_to_buffer!(actr.declarative, chunk[1])
     end
-    return nothing 
+    return nothing
 end

@@ -15,8 +15,8 @@ function responding!(actr, task, key, args...; kwargs...)
     description = "Respond"
     type = "model"
     id = get_name(actr)
-    tΔ = rnd_time(.060)
-    register!(actr, respond!, after, tΔ , actr, task, key;
+    tΔ = rnd_time(0.060)
+    register!(actr, respond!, after, tΔ, actr, task, key;
         id, description, type)
     return tΔ
 end

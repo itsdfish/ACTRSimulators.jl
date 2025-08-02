@@ -46,11 +46,11 @@ end
 function encode_action(actr, task)
     buffer = actr.visual.buffer
     word = buffer[1].slots.text
-    chunk = Chunk(;word)
+    chunk = Chunk(; word)
     clear_buffer!(actr.visual)
     # modify chunk
-    tΔ =  encoding!(actr, chunk)
-    register!(actr, clear_buffer!, after, tΔ , actr, actr.imaginal)
+    tΔ = encoding!(actr, chunk)
+    register!(actr, clear_buffer!, after, tΔ, actr, actr.imaginal)
     return nothing
 end
 
@@ -64,8 +64,8 @@ end
 
 function start_action(actr, task)
     clear_buffer!(actr.visual)
-    actr.goal.buffer[1].slots = (goal=:test,)
-    register!(actr, ()->(), now; description="start test phase")
+    actr.goal.buffer[1].slots = (goal = :test,)
+    register!(actr, ()->(), now; description = "start test phase")
     return nothing
 end
 

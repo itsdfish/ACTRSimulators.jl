@@ -3,17 +3,17 @@ import ACTRSimulators: start!, press_key!
 Random.seed!(8985)
 include("task.jl")
 
-scheduler = ACTRScheduler(;model_trace=true, store=true)
-task = SimpleTask(;scheduler)
+scheduler = ACTRScheduler(; model_trace = true, store = true)
+task = SimpleTask(; scheduler)
 procedural = Procedural()
 T = vo_to_chunk() |> typeof
 visicon = VisualObject[]
-visual_location = VisualLocation(buffer=T[])
-visual = Visual(buffer=T[])
+visual_location = VisualLocation(buffer = T[])
+visual = Visual(buffer = T[])
 motor = Motor()
-memory = [Chunk(;animal=:dog), Chunk(;animal=:cat)]
-declarative = Declarative(;memory)
-actr = ACTR(;scheduler, procedural, visual_location, visual, motor, declarative, visicon) 
+memory = [Chunk(; animal = :dog), Chunk(; animal = :cat)]
+declarative = Declarative(; memory)
+actr = ACTR(; scheduler, procedural, visual_location, visual, motor, declarative, visicon)
 
 function can_stop(actr)
     c1(actr) = !actr.visual_location.state.empty
@@ -24,7 +24,7 @@ function stop(actr, task)
     stop!(actr.scheduler)
 end
 
-rule1 = Rule(;conditions=can_stop, action=stop, actr, task, name="Stop")
+rule1 = Rule(; conditions = can_stop, action = stop, actr, task, name = "Stop")
 push!(procedural.rules, rule1)
 run!(actr, task)
 chunk = actr.visual_location.buffer[1]
@@ -32,7 +32,7 @@ chunk = actr.visual_location.buffer[1]
 
 observed = map(x -> x.description, scheduler.complete_events)
 expected = [
-    "Starting", 
+    "Starting",
     "Present Stimulus",
     "Selected Stop"
 ]

@@ -91,7 +91,7 @@ An ACT-R event scheduler object.
 - `complete_events`: an optional vector of completed events
 
 """
-mutable struct ACTRScheduler{PQ<:PriorityQueue,E} <: AbstractScheduler
+mutable struct ACTRScheduler{PQ <: PriorityQueue, E} <: AbstractScheduler
     events::PQ
     time::Float64
     running::Bool
@@ -115,12 +115,27 @@ Constructor for Scheduler with default keyword values:
 - `task_trace`: prints task trace if true 
 - `store`: stores the executed events for replay if set to true 
 """
-function ACTRScheduler(;event=Event, time=0.0, running=true, model_trace=false, task_trace=false, store=false)
-    events = PriorityQueue{event,Float64}()
-    return ACTRScheduler(events, time, running, model_trace, task_trace, store, Vector{event}())
+function ACTRScheduler(;
+    event = Event,
+    time = 0.0,
+    running = true,
+    model_trace = false,
+    task_trace = false,
+    store = false
+)
+    events = PriorityQueue{event, Float64}()
+    return ACTRScheduler(
+        events,
+        time,
+        running,
+        model_trace,
+        task_trace,
+        store,
+        Vector{event}()
+    )
 end
 
-run!(actr::AbstractACTR, task::AbstractTask, until=Inf) = run!([actr], task, until)
+run!(actr::AbstractACTR, task::AbstractTask, until = Inf) = run!([actr], task, until)
 
 """
     run!(actr, task::AbstractTask, until=Inf)
@@ -133,7 +148,7 @@ Simulate an ACT-R model
 - `task`: a task that is a subtype of `AbstractTask`
 - `until=Inf`: a specified termination time unless terminated sooner manually
 """
-function run!(models, task::AbstractTask, until=Inf)
+function run!(models, task::AbstractTask, until = Inf)
     s = task.scheduler
     last_event!(s, until)
     start!(task, models)
@@ -168,7 +183,7 @@ function next_event!(s, models, task)
     s.store ? push!(s.complete_events, event) : nothing
     s.model_trace && event.type == "model" ? print_event(event) : nothing
     s.task_trace && event.type !== "model" ? print_event(event) : nothing
-    return nothing 
+    return nothing
 end
 
 """
@@ -199,6 +214,6 @@ A function that initializes the simulation for the model.
 - `actr`: an ACT-R model object 
 """
 function start!(actr::AbstractACTR)
-    register!(actr, () -> (), now; description="Starting", id=get_name(actr))
+    register!(actr, () -> (), now; description = "Starting", id = get_name(actr))
     return nothing
 end

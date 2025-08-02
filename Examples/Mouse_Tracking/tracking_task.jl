@@ -18,15 +18,15 @@ PVT(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, scheduler
     screen=Vector{VisualObject}(), window=nothing, canvas=nothing, visible=false, speed=1.0)
 ````
 """
-@concrete mutable struct Tracking <: AbstractTask 
+@concrete mutable struct Tracking <: AbstractTask
     width::Float64
     height::Float64
-    scheduler
+    scheduler::Any
     screen::Vector{VisualObject}
-    canvas
-    window
-    dot
-    cursor
+    canvas::Any
+    window::Any
+    dot::Any
+    cursor::Any
     visible::Bool
     realtime::Bool
     speed::Float64
@@ -37,22 +37,22 @@ end
 Broadcast.broadcastable(x::Tracking) = Ref(x)
 
 function Tracking(;
-    width = 600.0, 
-    height = 600.0, 
-    scheduler = nothing, 
-    screen = Vector{VisualObject}(), 
-    window = nothing, 
-    canvas = nothing, 
-    dot = Dot(;width, height),
+    width = 600.0,
+    height = 600.0,
+    scheduler = nothing,
+    screen = Vector{VisualObject}(),
+    window = nothing,
+    canvas = nothing,
+    dot = Dot(; width, height),
     cursor = Cursor(),
-    visible = false, 
+    visible = false,
     realtime = false,
     speed = 1.0,
-    λθ = .01,
+    λθ = 0.01,
     revs_per_sec = 10,
     Δθ = (2 * π) * λθ * (1 / revs_per_sec)
-    )
-    visible ? ((canvas,window) = setup_window(width)) : nothing
+)
+    visible ? ((canvas, window) = setup_window(width)) : nothing
     visible ? Gtk.showall(window) : nothing
     return Tracking(
         width,
@@ -64,8 +64,8 @@ function Tracking(;
         dot,
         cursor,
         visible,
-        realtime, 
-        speed, 
+        realtime,
+        speed,
         Δθ,
         λθ
     )
@@ -85,15 +85,15 @@ function Dot(;
     height,
     r = (width + height) / 8,
     θ = rand(Uniform(0, 2 * π))
-    )
+)
     c_x = width / 2
     c_y = height / 2
-    x,y = compute_position(c_x, c_y, r, θ)
+    x, y = compute_position(c_x, c_y, r, θ)
     Dot(x, y, c_x, c_y, r, θ)
 end
 
 function compute_position!(dot)
-    x,y = compute_position(dot.c_x, dot.c_y, dot.r, dot.θ)
+    x, y = compute_position(dot.c_x, dot.c_y, dot.r, dot.θ)
     dot.x = x
     dot.y = y
 end
@@ -107,7 +107,7 @@ function compute_position(c_x, c_y, r, θ)
 end
 
 function get_position(dot)
-    return dot.x, dot.y 
+    return dot.x, dot.y
 end
 
 function update_angle!(dot, Δθ)
@@ -120,7 +120,7 @@ function update_dot!(task)
 end
 
 function update_vo!(models, task)
-    x,y = get_position(task.dot)
+    x, y = get_position(task.dot)
     move_vo!.(models, x, y)
 end
 
@@ -135,21 +135,21 @@ mutable struct Cursor
     y::Float64
 end
 
-Cursor(;x=0.0, y=0.0) = Cursor(x, y)
+Cursor(; x = 0.0, y = 0.0) = Cursor(x, y)
 
 function draw_object!(task, dot::Dot)
     draw_object!(task, "O", dot.x, dot.y)
 end
 
 function start!(task::Tracking, models)
-    x,y = compute_position(task.dot)
+    x, y = compute_position(task.dot)
     present_stimulus(task, models, task.dot)
     run_trial!(task, models)
 end
 
 function present_stimulus(task, models, dot)
-    vo = VisualObject(;x = dot.x, y = dot.y)
-    add_to_visicon!(models, vo; stuff=true)
+    vo = VisualObject(; x = dot.x, y = dot.y)
+    add_to_visicon!(models, vo; stuff = true)
     push!(task.screen, vo)
     task.visible ? repaint!(task, models) : nothing
 end
@@ -166,5 +166,5 @@ end
 function repaint!(task::Tracking, models)
     clear!(task)
     draw_object!(task, task.dot)
-    draw_attention!.(task, models) 
+    draw_attention!.(task, models)
 end

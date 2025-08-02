@@ -1,7 +1,7 @@
 name = "ACTRSimulators"
 uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
 authors = ["itsdfish"]
-version = "0.3.6"
+version = "0.3.7"
 
 [deps]
 ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
@@ -20,7 +20,7 @@ SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 [compat]
 ACTRModels = "v0.9.0, 0.10, 0.11, 0.12, 0.13"
 Cairo = "v1.0.0"
-CodeTracking = "1"
+CodeTracking = "1, 2"
 ConcreteStructs = "v0.2.0"
 DataFrames = "1.0"
 DataStructures = "v0.18.0"

@@ -10,20 +10,20 @@ is added to the visual location buffer.
 - `vo`: visual object 
 - `stuff`: buffer stuffing if true 
 """
-function add_to_visicon!(actr::AbstractACTR, vo; stuff=false) 
+function add_to_visicon!(actr::AbstractACTR, vo; stuff = false)
     push!(actr.visicon, deepcopy(vo))
-    if stuff 
-       chunk = vo_to_chunk(actr, vo)
-       add_to_buffer!(actr.visual_location, chunk)
+    if stuff
+        chunk = vo_to_chunk(actr, vo)
+        add_to_buffer!(actr.visual_location, chunk)
     end
-    return nothing 
+    return nothing
 end
 
-function add_to_visicon!(models, vo; stuff=false) 
-    for model in models 
+function add_to_visicon!(models, vo; stuff = false)
+    for model in models
         add_to_visicon!(model, vo; stuff)
     end
-    return nothing 
+    return nothing
 end
 
 """
@@ -47,7 +47,8 @@ Removes object from visicon.
 - `actr`: an ACT-R model object 
 - `vo`: a visual object 
 """
-remove_visual_object!(actr::AbstractACTR, vo) = remove_visual_object!(actr.visual_location.visicon, vo)
+remove_visual_object!(actr::AbstractACTR, vo) =
+    remove_visual_object!(actr.visual_location.visicon, vo)
 
 """
     remove_visual_object!(visicon, vo)
@@ -70,8 +71,8 @@ end
 
 Converts visible object to a chunk with color and text slots.
 """
-function vo_to_chunk(vo=VisualObject())
-     return Chunk(;color=vo.color, text=vo.text, x=vo.x, y=vo.y)
+function vo_to_chunk(vo = VisualObject())
+    return Chunk(; color = vo.color, text = vo.text, x = vo.x, y = vo.y)
 end
 
 """
@@ -86,7 +87,7 @@ Converts visible object to a chunk with color and text slots, and sets time crea
 """
 function vo_to_chunk(actr, vo)
     time_created = get_time(actr)
-    return Chunk(;time_created, color=vo.color, text=vo.text, x=vo.x, y=vo.y)
+    return Chunk(; time_created, color = vo.color, text = vo.text, x = vo.x, y = vo.y)
 end
 
 function move_vo!(actr, x, y)
@@ -111,8 +112,8 @@ function attending!(actr, chunk)
     description = "Attend"
     type = "model"
     id = get_name(actr)
-    tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk; id, description, type)
+    tΔ = rnd_time(0.085)
+    register!(actr, attend!, after, tΔ, actr, chunk; id, description, type)
 end
 
 function attending!(actr, chunk, task)
@@ -120,8 +121,8 @@ function attending!(actr, chunk, task)
     description = "Attend"
     type = "model"
     id = get_name(actr)
-    tΔ = rnd_time(.085)
-    register!(actr, attend!, after, tΔ , actr, chunk, task; id, description, type)
+    tΔ = rnd_time(0.085)
+    register!(actr, attend!, after, tΔ, actr, chunk, task; id, description, type)
 end
 
 """
@@ -137,19 +138,19 @@ states to busy = false and empty = false.
 """
 function attend!(actr, chunk)
     slots = chunk.slots
-    actr.visual.focus = [slots.x,slots.y]
+    actr.visual.focus = [slots.x, slots.y]
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
-    return nothing 
+    return nothing
 end
 
 function attend!(actr, chunk, task)
     slots = chunk.slots
-    actr.visual.focus = [slots.x,slots.y]
+    actr.visual.focus = [slots.x, slots.y]
     actr.visual.state.busy = false
     actr.visual.state.empty = false
     add_to_buffer!(actr.visual, chunk)
     task.visible ? repaint!(task, actr) : nothing
-    return nothing 
+    return nothing
 end

@@ -1,22 +1,61 @@
 
-function register!(actr::AbstractACTR, fun, when::Now, args...; id="", type="", description="", kwargs...)
+function register!(
+    actr::AbstractACTR,
+    fun,
+    when::Now,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = actr.scheduler
     register!(scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
 end
 
-function register!(actr::AbstractACTR, fun, when::At, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    actr::AbstractACTR,
+    fun,
+    when::At,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = actr.scheduler
     register!(scheduler, fun, t, args...; id, type, description, kwargs...)
 end
 
-function register!(actr::AbstractACTR, fun, when::After, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    actr::AbstractACTR,
+    fun,
+    when::After,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = actr.scheduler
     register!(scheduler, fun, scheduler.time + t, args...; id, type, description, kwargs...)
 end
 
-function register!(actr::AbstractACTR, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    actr::AbstractACTR,
+    fun,
+    when::Every,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = actr.scheduler
-    function f(args...; kwargs...) 
+    function f(args...; kwargs...)
         fun1 = () -> fun(args...; kwargs...)
         fun1()
         register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
@@ -24,24 +63,63 @@ function register!(actr::AbstractACTR, fun, when::Every, t, args...; id="", type
     register!(scheduler, f, after, t, args...; id, type, description, kwargs...)
 end
 
-function register!(task::AbstractTask, fun, when::Now, args...; id="", type="", description="", kwargs...)
+function register!(
+    task::AbstractTask,
+    fun,
+    when::Now,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = task.scheduler
     register!(scheduler, fun, scheduler.time, args...; id, type, description, kwargs...)
 end
 
-function register!(task::AbstractTask, fun, when::At, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    task::AbstractTask,
+    fun,
+    when::At,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = task.scheduler
     register!(scheduler, fun, t, args...; id, type, description, kwargs...)
 end
 
-function register!(task::AbstractTask, fun, when::After, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    task::AbstractTask,
+    fun,
+    when::After,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = task.scheduler
     register!(scheduler, fun, scheduler.time + t, args...; id, type, description, kwargs...)
 end
 
-function register!(task::AbstractTask, fun, when::Every, t, args...; id="", type="", description="", kwargs...)
+function register!(
+    task::AbstractTask,
+    fun,
+    when::Every,
+    t,
+    args...;
+    id = "",
+    type = "",
+    description = "",
+    kwargs...
+)
     scheduler = task.scheduler
-    function f(args...; kwargs...) 
+    function f(args...; kwargs...)
         fun1 = () -> fun(args...; kwargs...)
         fun1()
         register!(scheduler, fun, every, t, args...; id, type, description, kwargs...)
@@ -61,7 +139,7 @@ end
 
 function start!(task, actr)
     @error "A method must be defined for start! in the form of 
-    start!(task, actr)" 
+    start!(task, actr)"
 end
 
 """
@@ -78,9 +156,9 @@ architecture.
 function why_not(actr, rule)
     str = rule.name * "\n"
     for c in rule.conditions
-         str *= @code_string c(actr) 
-         str *= string(" ", c(actr))
-         str *= "\n"
+        str *= @code_string c(actr)
+        str *= string(" ", c(actr))
+        str *= "\n"
     end
     println(str)
     return nothing

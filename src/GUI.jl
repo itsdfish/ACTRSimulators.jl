@@ -18,14 +18,14 @@ function clear!(task)
     @guarded draw(c) do widget
         ctx = getgc(c)
         rectangle(ctx, 0, 0, w, w)
-        set_source_rgb(ctx, .8, .8, .8)
+        set_source_rgb(ctx, 0.8, 0.8, 0.8)
         fill(ctx)
     end
     Gtk.showall(c)
     return nothing
 end
 
-setup_window(width::Float64, name="") = setup_window(width, width, name)
+setup_window(width::Float64, name = "") = setup_window(width, width, name)
 
 """
     setup_window(width::Float64, height::Float64, name="")
@@ -38,17 +38,17 @@ Generate a blank window.
 - `height`: height of window
 - `name=""`: name of window to appear on upper tab
 """
-function setup_window(width::Float64, height::Float64, name="")
+function setup_window(width::Float64, height::Float64, name = "")
     canvas = @GtkCanvas()
     window = GtkWindow(canvas, name, width, height)
     Gtk.visible(window, true)
     @guarded draw(canvas) do widget
         ctx = getgc(canvas)
         rectangle(ctx, 0.0, 0.0, width, width)
-        set_source_rgb(ctx, .8, .8, .8)
+        set_source_rgb(ctx, 0.8, 0.8, 0.8)
         fill(ctx)
     end
-    return canvas,window
+    return canvas, window
 end
 
 """
@@ -61,7 +61,7 @@ Draws a yellow circle to represent visual attention
 - `task`: a task object <: AbstractTask
 - `model`: an ACT-R model object
 """
-function draw_attention!(task, actr) 
+function draw_attention!(task, actr)
     focus = actr.visual.focus
     draw_attention!(task, focus...)
 end
@@ -82,7 +82,7 @@ function draw_attention!(task, x, y)
     @guarded draw(c) do widget
         ctx = getgc(c)
         arc(ctx, x, y, 20, 0, 2π)
-        set_source_rgba(ctx, .933, .956, .443, .6)
+        set_source_rgba(ctx, 0.933, 0.956, 0.443, 0.6)
         fill(ctx)
     end
     Gtk.showall(c)
@@ -107,7 +107,7 @@ function draw_object!(task, object, x, y)
     @guarded draw(c) do widget
         ctx = getgc(c)
         select_font_face(ctx, "Arial", Cairo.FONT_SLANT_NORMAL,
-             Cairo.FONT_WEIGHT_BOLD);
+            Cairo.FONT_WEIGHT_BOLD);
         set_font_size(ctx, 36)
         set_source_rgb(ctx, 0, 0, 0)
         extents = text_extents(ctx, object)
@@ -121,5 +121,5 @@ function draw_object!(task, object, x, y)
 end
 
 function repaint!(task::AbstractTask, actr)
-    draw_attention!(task, actr) 
+    draw_attention!(task, actr)
 end

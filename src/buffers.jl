@@ -26,7 +26,7 @@ function clear_buffer!(mod::Mod)
     return nothing
 end
 
-function remove_chunk!(mod::Mod) 
+function remove_chunk!(mod::Mod)
     mod.state.empty = true
     empty!(mod.buffer)
     return nothing

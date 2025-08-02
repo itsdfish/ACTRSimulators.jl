@@ -46,20 +46,36 @@ end
 ###################################################################################################
 #                                        Utilities
 ###################################################################################################
-function init_model(scheduler, task, id=1; parms...)
+function init_model(scheduler, task, id = 1; parms...)
     name = string("model", id)
     procedural = Procedural()
     T = vo_to_chunk() |> typeof
-    visual_location = VisualLocation(buffer=T[])
-    visual = Visual(buffer=T[])
+    visual_location = VisualLocation(buffer = T[])
+    visual = Visual(buffer = T[])
     visicon = VisualObject[]
     motor = Motor()
-    actr = ACTR(;name, scheduler, procedural, visual_location, visual, motor, visicon, parms...)
-    rule1 = Rule(;conditions=can_attend, action=attend_action, actr, task, name="Attend")
+    actr = ACTR(;
+        name,
+        scheduler,
+        procedural,
+        visual_location,
+        visual,
+        motor,
+        visicon,
+        parms...
+    )
+    rule1 =
+        Rule(; conditions = can_attend, action = attend_action, actr, task, name = "Attend")
     push!(procedural.rules, rule1)
-    rule2 = Rule(;conditions=can_wait, action=wait_action, actr, task, name="Wait")
+    rule2 = Rule(; conditions = can_wait, action = wait_action, actr, task, name = "Wait")
     push!(procedural.rules, rule2)
-    rule3 = Rule(;conditions=can_respond, action=respond_action, actr, task, name="Respond")
+    rule3 = Rule(;
+        conditions = can_respond,
+        action = respond_action,
+        actr,
+        task,
+        name = "Respond"
+    )
     push!(procedural.rules, rule3)
     return actr
 end

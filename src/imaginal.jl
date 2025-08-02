@@ -13,8 +13,8 @@ function encoding!(actr, chunk)
     description = "Create New Chunk"
     type = "model"
     id = get_name(actr)
-    tΔ = rnd_time(.200)
-    register!(actr, encode!, after, tΔ , actr, chunk; id, description, type)
+    tΔ = rnd_time(0.200)
+    register!(actr, encode!, after, tΔ, actr, chunk; id, description, type)
     return tΔ
 end
 
@@ -33,5 +33,5 @@ function encode!(actr, chunk)
     actr.imaginal.state.busy = false
     actr.imaginal.state.empty = false
     add_to_buffer!(actr.imaginal, chunk)
-    return nothing 
+    return nothing
 end
