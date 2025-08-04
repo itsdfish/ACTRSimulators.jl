@@ -127,11 +127,6 @@ function register!(
     register!(scheduler, f, after, t, args...; id, type, description, kwargs...)
 end
 
-function import_gui()
-    path = pathof(ACTRSimulators) |> dirname |> x -> joinpath(x, "")
-    include(path * "GUI.jl")
-end
-
 function press_key!(task, actr, key)
     @error "A method must be defined for press_key! in the form of 
     press_key!(task, actr, key)"

@@ -1,18 +1,27 @@
+module GtkExt
 
 #https://developer.gnome.org/pygtk/stable/class-gtkwidget.html#method-gtkwidget--get-allocation
 #https://github.com/JuliaGraphics/Gtk.jl/blob/543a4f13eabf6b62edb0c11c51a715219be37629/src/base.jl
+using ACTRSimulators
+using Cairo
+using Gtk
 
-@reexport using Gtk, Cairo
+import ACTRSimulators: clear! 
+import ACTRSimulators: draw_attention!
+import ACTRSimulators: draw_object!
+import ACTRSimulators: repaint!
+import ACTRSimulators: setup_window
+
 """
-    clear!(task)   
+    clear!(task::AbstractTask)   
 
 Clears all stimuli from window. 
 
 # Arguments
 
-- `task`: a task object <: AbstractTask
+- `task::AbstractTask`: a task object
 """
-function clear!(task)
+function clear!(task::AbstractTask)
     c = task.canvas
     w = task.width
     @guarded draw(c) do widget
@@ -122,4 +131,5 @@ end
 
 function repaint!(task::AbstractTask, actr)
     draw_attention!(task, actr)
+end
 end

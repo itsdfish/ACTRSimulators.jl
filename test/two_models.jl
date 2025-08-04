@@ -1,4 +1,10 @@
-using ACTRSimulators, Test, ACTRModels, Random, DataFrames
+using ACTRModels
+using ACTRSimulators
+using DataFrames
+using DiscreteEventsLite
+using Test
+using Random
+
 import ACTRSimulators: start!, press_key!
 
 Random.seed!(8985)

@@ -3,12 +3,21 @@
 ###################################################################################################
 cd(@__DIR__)
 using Pkg
-Pkg.activate("../..")
-using Revise, ConcreteStructs, ACTRSimulators, DataFrames, FreqTables
+Pkg.activate("../")
+using ACTRModels
+using ACTRSimulators
+using Cairo
+using ConcreteStructs
+using DataFrames
+using DiscreteEventsLite
+using Distributions
+using FreqTables
+using Gtk
+using Random
+using Revise
 import ACTRSimulators: start!, press_key!
-import_gui()
-include("Recognition_Memory_Task.jl")
-include("Recognition_Memory_Model.jl")
+include("recognition_memory_task.jl")
+include("recognition_memory_model.jl")
 ###################################################################################################
 #                                        Run Model
 ###################################################################################################

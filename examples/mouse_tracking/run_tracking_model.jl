@@ -4,8 +4,16 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate("../..")
-using Revise, ACTRSimulators, ConcreteStructs
-import_gui()
+Pkg.activate("../")
+using ACTRModels
+using ACTRSimulators
+using ConcreteStructs
+using DiscreteEventsLite
+using Distributions
+using Gtk
+using Random
+using Revise
+
 import ACTRSimulators: start!, repaint!
 include("tracking_task.jl")
 include("tracking_model.jl")

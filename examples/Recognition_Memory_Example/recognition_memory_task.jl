@@ -104,7 +104,7 @@ function present_stimulus(task, actr, word)
 end
 
 function study_trial!(task, actr)
-    @unpack study_words, study_trial = task
+    (; study_words, study_trial) = task
     isi = 0.5
     description = "present stimulus"
     word = study_words[study_trial].word
@@ -126,7 +126,7 @@ function start_test(task, actr)
 end
 
 function test_trial!(task, actr)
-    @unpack test_words, test_trial = task
+    (; test_words, test_trial) = task
     isi = 0.5
     description = "present stimulus"
     task.test_word = test_words[test_trial]
@@ -170,7 +170,7 @@ function update_task!(task, actr)
 end
 
 function press_key!(task::Task, actr, key)
-    @unpack data, test_word = task
+    (; data, test_word) = task
     push!(data, [test_word.word test_word.type key])
     empty!(task.screen)
     task.visible ? clear!(task) : nothing

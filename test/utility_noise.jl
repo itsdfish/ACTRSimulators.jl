@@ -1,4 +1,10 @@
-using ACTRSimulators, Test, ACTRModels, DataFrames, Random
+using ACTRModels
+using ACTRSimulators
+using DataFrames
+using DiscreteEventsLite
+using Test
+using Random
+
 import ACTRSimulators: start!, press_key!
 using Statistics
 

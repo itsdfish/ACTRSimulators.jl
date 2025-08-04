@@ -1,7 +1,5 @@
 module ACTRSimulators
 
-using Reexport
-@reexport using DiscreteEventsLite, ACTRModels
 using ACTRModels
 using CodeTracking
 using DataStructures
@@ -47,6 +45,7 @@ export clear_visicon!
 export move_vo!
 export repaint!
 export draw_object
+export draw_object!
 export clear!
 export draw_attention!
 export why_not
@@ -59,4 +58,5 @@ include("visual.jl")
 include("motor.jl")
 include("procedural.jl")
 include("utilities.jl")
+include("extension_methods.jl")
 end

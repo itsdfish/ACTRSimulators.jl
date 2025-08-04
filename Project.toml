@@ -1,7 +1,7 @@
 name = "ACTRSimulators"
 uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
 authors = ["itsdfish"]
-version = "0.3.7"
+version = "0.3.8"
 
 [deps]
 ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
@@ -11,33 +11,29 @@ ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 DiscreteEventsLite = "8b1724b8-7d2d-4f3a-bca2-6234a697fafb"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
-SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
+
+[weakdeps]
+Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+
+[extensions]
+GtkExt = "Gtk"
 
 [compat]
 ACTRModels = "v0.9.0, 0.10, 0.11, 0.12, 0.13"
 Cairo = "v1.0.0"
-CodeTracking = "1, 2"
+CodeTracking = "2.0.0"
 ConcreteStructs = "v0.2.0"
-DataFrames = "1.0"
 DataStructures = "v0.18.0"
 DiscreteEventsLite = "v0.1.0"
 Distributions = "0.25.0"
 Gtk = "v1.1.0"
 Printf = "1"
-Random = "1"
-Reexport = "1.0.0"
-SafeTestsets = "v0.0.1, 0.1.0"
-Statistics = "1"
+Test = "1.11.0"
 julia = "^1.0"
 
 [extras]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Statistics", "DataFrames"]
+test = ["Test"]
