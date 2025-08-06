@@ -28,17 +28,17 @@ Task(;n_trials=10, trial=1, lb=2.0, ub=10.0, width=600.0, height=600.0, schedule
     block::Int
     width::Float64
     hight::Float64
-    scheduler::Any
+    scheduler
     screen::Vector{VisualObject}
-    canvas::Any
-    window::Any
+    canvas
+    window
     visible::Bool
     realtime::Bool
     speed::Float64
-    study_words::Any
-    test_words::Any
-    data::Any
-    test_phase::Any
+    study_words
+    test_words
+    data
+    test_phase
     test_word::NamedTuple
 end
 
@@ -131,8 +131,7 @@ function test_trial!(task, actr)
     description = "present stimulus"
     task.test_word = test_words[test_trial]
     word = task.test_word.word
-    register!(task, present_stimulus, after, isi, task, actr, word;
-        description)
+    register!(task, present_stimulus, after, isi, task, actr, word; description)
 end
 
 function update_block!(task)
@@ -194,7 +193,8 @@ function populate_lists()
         (word = "pan", type = "target"),
         (word = "phone", type = "target"),
         (word = "shirt", type = "target"),
-        (word = "tree", type = "target"), (word = "rug", type = "foil"),
+        (word = "tree", type = "target"),
+        (word = "rug", type = "foil"),
         (word = "car", type = "foil"),
         (word = "pool", type = "foil"),
         (word = "lump", type = "foil"),
@@ -203,6 +203,5 @@ function populate_lists()
         (word = "harp", type = "foil"),
         (word = "ape", type = "foil")
     ]
-    stimuli = (study_words = study_words, test_words = test_words)
-    return stimuli
+    return (; study_words, test_words)
 end

@@ -1,12 +1,9 @@
 module GtkExt
-
-#https://developer.gnome.org/pygtk/stable/class-gtkwidget.html#method-gtkwidget--get-allocation
-#https://github.com/JuliaGraphics/Gtk.jl/blob/543a4f13eabf6b62edb0c11c51a715219be37629/src/base.jl
 using ACTRSimulators
 using Cairo
 using Gtk
 
-import ACTRSimulators: clear! 
+import ACTRSimulators: clear!
 import ACTRSimulators: draw_attention!
 import ACTRSimulators: draw_object!
 import ACTRSimulators: repaint!
