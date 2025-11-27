@@ -1,7 +1,7 @@
 name = "ACTRSimulators"
 uuid = "c655e612-5123-41dd-bf97-8af606dbe7c1"
-authors = ["itsdfish"]
 version = "0.3.7"
+authors = ["itsdfish"]
 
 [deps]
 ACTRModels = "c095b0ea-a6ca-5cbd-afed-dbab2e976880"
@@ -22,7 +22,7 @@ GtkExt = "Gtk"
 [compat]
 ACTRModels = "v0.9.0, 0.10, 0.11, 0.12, 0.13"
 Cairo = "v1.0.0"
-CodeTracking = "2.0.0"
+CodeTracking = "2.0.0, 3"
 ConcreteStructs = "v0.2.0"
 DataStructures = "v0.18.0"
 DiscreteEventsLite = "v0.1.0"
